@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { Navbar } from './components/layout/Navbar';
-import { ExecutiveKPIs } from './components/summary/ExecutiveKPIs';
-import { TradingInsights } from './components/summary/TradingInsights';
-import { ActualVsForecastChart } from './components/charts/ActualVsForecastChart';
-import { AccuracyDeepDive } from './components/accuracy/AccuracyDeepDive';
-import { ForecastEvolutionView } from './components/evolution/ForecastEvolutionView';
-import { SettlementDataTable } from './components/table/SettlementDataTable';
+import { motion, AnimatePresence } from 'motion/react';
+import { AtmosphericField } from './components/layout/AtmosphericField';
+import { CommandHeader } from './components/layout/CommandHeader';
+import { DecisionCockpit } from './components/summary/DecisionCockpit';
+import { MarketIntelligence } from './components/summary/MarketIntelligence';
+import { ForecastHeroChart } from './components/charts/ForecastHeroChart';
+import { AccuracyWorkspace } from './components/accuracy/AccuracyWorkspace';
+import { ForecastEvolutionScrubber } from './components/evolution/ForecastEvolutionScrubber';
+import { SettlementTerminalGrid } from './components/table/SettlementTerminalGrid';
 import { api } from './services/api';
-import { LineChart, BarChart2, GitCommit, Table, RefreshCw, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,10 +27,9 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<'SERIES' | 'ACCURACY' | 'EVOLUTION' | 'TABLE'>('SERIES');
   const [selectedPeriod, setSelectedPeriod] = useState<string>('2026-01-15T18:00:00Z');
 
-  // Queries
+  // Backend queries
   const {
     data: summary,
-    isLoading: isSummaryLoading,
     error: summaryError,
   } = useQuery({
     queryKey: ['summary', cutoffHour, resolution],
@@ -66,143 +67,133 @@ function DashboardContent() {
   const latestPoint = series && series.length > 0 ? series[series.length - 1] : undefined;
 
   return (
-    <div className="min-h-screen bg-navy-900 text-slate-100 flex flex-col font-sans">
-      <Navbar
+    <div className="min-h-screen bg-[#080B10] text-slate-100 flex flex-col font-sans relative selection:bg-[#00E5FF]/20 selection:text-white">
+      {/* Subtle Atmospheric Energy Field */}
+      <AtmosphericField />
+
+      {/* Thin Command Terminal Header */}
+      <CommandHeader
         cutoffHour={cutoffHour}
         setCutoffHour={setCutoffHour}
         resolution={resolution}
         setResolution={setResolution}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Error Banner if API connection fails */}
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 relative z-10">
+        {/* Error Notice if API is unreachable */}
         {summaryError && (
-          <div className="bg-rose-950/80 border border-rose-500 rounded-xl p-4 flex items-center space-x-3 text-rose-200 text-sm">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <div>
-              <span className="font-bold">Backend Connection Notice:</span> Could not connect to API server. Ensure the backend daemon is running on port 8000.
-            </div>
+          <div className="bg-rose-950/70 border border-rose-500/40 rounded p-3 flex items-center space-x-2.5 text-rose-200 text-xs font-mono">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+            <span>Connection Warning: Could not reach backend analytical service. Ensure FastAPI daemon is running on port 8000.</span>
           </div>
         )}
 
-        {/* Executive KPI Strip */}
+        {/* Primary Decision Cockpit (Pillars 1, 2, 3) */}
         {summary ? (
-          <ExecutiveKPIs summary={summary} latestPoint={latestPoint} />
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <DecisionCockpit summary={summary} latestPoint={latestPoint} />
+          </motion.div>
         ) : (
-          <div className="h-28 bg-navy-800/40 border border-navy-700/60 rounded-xl animate-pulse flex items-center justify-center text-xs text-slate-500">
-            Loading executive benchmarks...
+          <div className="h-44 border border-white/[0.06] bg-[#0E131F]/50 rounded-lg animate-pulse flex items-center justify-center text-xs font-mono text-slate-500">
+            Initialising decision signal & risk benchmarks...
           </div>
         )}
 
-        {/* Automated Trading Insights Panel */}
-        {summary && <TradingInsights insights={summary.insights} />}
-
-        {/* Controlled Tab Navigation */}
-        <div className="border-b border-navy-700/80 flex items-center justify-between">
-          <nav className="flex space-x-1 sm:space-x-3 text-xs sm:text-sm font-medium">
-            <button
-              onClick={() => setActiveTab('SERIES')}
-              className={`flex items-center space-x-2 py-3 px-3 border-b-2 transition-all ${
-                activeTab === 'SERIES'
-                  ? 'border-wind-teal text-wind-teal font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-white'
-              }`}
-            >
-              <LineChart className="w-4 h-4" />
-              <span>Forecast vs. Actuals</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('ACCURACY')}
-              className={`flex items-center space-x-2 py-3 px-3 border-b-2 transition-all ${
-                activeTab === 'ACCURACY'
-                  ? 'border-wind-teal text-wind-teal font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-white'
-              }`}
-            >
-              <BarChart2 className="w-4 h-4" />
-              <span>Forecast Accuracy & Error Analysis</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('EVOLUTION')}
-              className={`flex items-center space-x-2 py-3 px-3 border-b-2 transition-all ${
-                activeTab === 'EVOLUTION'
-                  ? 'border-wind-teal text-wind-teal font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-white'
-              }`}
-            >
-              <GitCommit className="w-4 h-4" />
-              <span>Forecast Evolution Tracker</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('TABLE')}
-              className={`flex items-center space-x-2 py-3 px-3 border-b-2 transition-all ${
-                activeTab === 'TABLE'
-                  ? 'border-wind-teal text-wind-teal font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-white'
-              }`}
-            >
-              <Table className="w-4 h-4" />
-              <span>Settlement Reconciliation Grid</span>
-            </button>
-          </nav>
-
-          <div className="hidden sm:flex items-center text-xs text-slate-400 font-mono">
-            <span>Market Delivery: Jan 1 – 31, 2026 (GMT)</span>
-          </div>
-        </div>
-
-        {/* Tab Viewport */}
-        <div className="transition-all">
+        {/* Tab Viewport with Smooth Motion Transitions */}
+        <AnimatePresence mode="wait">
           {activeTab === 'SERIES' && (
-            <div>
+            <motion.div
+              key="SERIES"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
+              {/* ECharts Central Hero Surface */}
               {isSeriesLoading ? (
-                <div className="h-[400px] bg-navy-800/40 border border-navy-700/60 rounded-xl animate-pulse flex items-center justify-center text-xs text-slate-500">
-                  Loading 30-minute time-series data...
+                <div className="h-[440px] border border-white/[0.06] bg-[#0E131F]/50 rounded-lg animate-pulse flex items-center justify-center text-xs font-mono text-slate-500">
+                  Rendering 30-minute time-series surface...
                 </div>
               ) : series ? (
-                <ActualVsForecastChart series={series} onSelectPeriod={handleSelectPeriod} />
+                <ForecastHeroChart series={series} onSelectPeriod={handleSelectPeriod} />
               ) : null}
-            </div>
+
+              {/* Editorial Market Intelligence Briefing */}
+              {summary && <MarketIntelligence summary={summary} />}
+            </motion.div>
           )}
 
           {activeTab === 'ACCURACY' && (
-            <AccuracyDeepDive
-              series={series || []}
-              distribution={distribution}
-              diurnal={diurnal}
-              horizon={horizon}
-            />
+            <motion.div
+              key="ACCURACY"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+            >
+              {summary && (
+                <AccuracyWorkspace
+                  summary={summary}
+                  series={series || []}
+                  distribution={distribution}
+                  diurnal={diurnal}
+                  horizon={horizon}
+                />
+              )}
+            </motion.div>
           )}
 
           {activeTab === 'EVOLUTION' && (
-            <ForecastEvolutionView initialDeliveryTime={selectedPeriod} />
+            <motion.div
+              key="EVOLUTION"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+            >
+              <ForecastEvolutionScrubber initialDeliveryTime={selectedPeriod} />
+            </motion.div>
           )}
 
           {activeTab === 'TABLE' && (
-            <SettlementDataTable
-              cutoffHour={cutoffHour}
-              resolution={resolution}
-              onSelectPeriod={handleSelectPeriod}
-            />
+            <motion.div
+              key="TABLE"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+            >
+              <SettlementTerminalGrid
+                cutoffHour={cutoffHour}
+                resolution={resolution}
+                onSelectPeriod={handleSelectPeriod}
+              />
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </main>
 
-      {/* Institutional Footer */}
-      <footer className="bg-navy-950 border-t border-navy-800/80 py-4 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+      {/* Razor-Thin Terminal Footer */}
+      <footer className="border-t border-white/[0.06] bg-[#06080D]/95 py-3 mt-auto relative z-10">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-slate-400 gap-2">
           <div className="flex items-center space-x-2">
-            <span className="font-semibold text-slate-300">Data Source:</span>
-            <span>Elexon BMRS (FUELHH Outturn & WINDFOR Forecast Streams)</span>
+            <span className="text-white font-medium">BMRS DATA FEEDS:</span>
+            <span>FUELHH OUTTURN (WIND)</span>
+            <span className="text-white/20">·</span>
+            <span>WINDFOR FORECAST RUNS</span>
           </div>
           <div>
-            <span>UK Electricity Market Timezone: GMT (UTC+0) | Settlement Periods 1 to 48</span>
+            <span>GB ELECTRICITY MARKET TIME: GMT (UTC+0) · SETTLEMENT PERIODS 1–48</span>
           </div>
-          <div className="text-slate-400">
-            <span>REint Energy Procurement Intelligence v1.0</span>
+          <div>
+            <span className="text-slate-400">REint Forecasting IQ · v2.0 Enterprise</span>
           </div>
         </div>
       </footer>
