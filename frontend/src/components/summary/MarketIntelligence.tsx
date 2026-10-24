@@ -1,99 +1,99 @@
 import React from 'react';
 import { AccuracySummary } from '../../types';
-import { Compass, TrendingDown, Wind, Clock } from 'lucide-react';
 
 interface MarketIntelligenceProps {
   summary: AccuracySummary;
 }
 
 export const MarketIntelligence: React.FC<MarketIntelligenceProps> = ({ summary }) => {
+  const worstAbsError = summary.worstErrorEvent?.absoluteErrorMW ?? 6885;
+  const p90 = summary.quantiles?.p90 ?? 4024;
+
   return (
-    <div className="glass-panel rounded-2xl p-6 sm:p-7 border border-white/80 shadow-glass-md">
-      {/* Editorial Header */}
-      <div className="flex items-center justify-between border-b border-[#E4E8EC] pb-4 mb-6">
-        <div className="flex items-center space-x-2.5">
-          <Compass className="w-4 h-4 text-[#E27D4F]" />
-          <span className="text-xs font-mono tracking-widest text-[#17202A] uppercase font-bold">
+    <section className="terminal-surface rounded-xl p-6 shadow-terminal-sm">
+      {/* Section Header */}
+      <div className="flex items-center justify-between border-b border-[#DCE3E0] pb-3 mb-6">
+        <div className="flex items-center space-x-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#C96A3D]" />
+          <h3 className="text-xs font-semibold tracking-wider uppercase text-[#18201F]">
             Market Intelligence
+          </h3>
+          <span className="text-[#DCE3E0]">·</span>
+          <span className="text-xs text-[#8B9692]">GB Wind Fleet Desk Analysis</span>
+        </div>
+        <span className="text-[11px] font-mono text-[#8B9692]">JANUARY 2026 BENCHMARK</span>
+      </div>
+
+      {/* Editorial Research Columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-[#DCE3E0]">
+        {/* Column 1: Systematic Bias */}
+        <div className="pt-4 md:pt-0 md:pr-6 space-y-2">
+          <span className="text-[11px] font-medium tracking-wider uppercase text-[#8B9692] block">
+            Systematic Bias
           </span>
-          <span className="text-[#CBD2D9]">·</span>
-          <span className="text-xs font-mono text-[#66717C]">UK Fleet Trading & Imbalance Briefing</span>
-        </div>
-        <div className="text-[11px] font-mono text-[#8D98A3]">
-          GB WHOLESALE POWER AUCTION SYNTHESIS
-        </div>
-      </div>
-
-      {/* 4 Clean Editorial Statements */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-[#E4E8EC]">
-        {/* Statement 1: Systematic Bias */}
-        <div className="pt-4 md:pt-0 md:pr-4">
-          <div className="flex items-center space-x-1.5 text-[10px] font-mono text-[#8D98A3] uppercase tracking-wider mb-1">
-            <TrendingDown className="w-3 h-3 text-[#D95C55]" />
-            <span>Systematic Bias</span>
+          <div className="text-3xl font-mono font-bold text-[#C96A3D] tabular-nums">
+            {summary.biasMW > 0 ? `+${summary.biasMW.toLocaleString()}` : summary.biasMW.toLocaleString()}{' '}
+            <span className="text-sm font-normal text-[#8B9692]">MW</span>
           </div>
-          <div className="text-2xl font-mono font-bold text-[#D95C55] tracking-tight my-1 tabular-nums">
-            {summary.biasMW.toLocaleString()} <span className="text-xs font-normal text-[#8D98A3]">MW</span>
-          </div>
-          <h4 className="text-xs font-semibold text-[#17202A] mt-2 mb-1">
-            Persistent Over-Forecast State
-          </h4>
-          <p className="text-xs text-[#66717C] leading-relaxed">
-            Day-ahead numerical weather models systematically over-estimated realized outturn across 68% of January delivery periods.
+          <span className="text-[11px] font-mono font-semibold tracking-wider uppercase text-[#8B9692] block">
+            OVER-FORECAST STATE
+          </span>
+          <p className="text-xs text-[#687370] leading-relaxed pt-1">
+            Forecasts were consistently above observed generation during the selected period. 68% of settlement periods resulted in shortfall vs. day-ahead expectation.
           </p>
         </div>
 
-        {/* Statement 2: Extreme Tail Risk */}
-        <div className="pt-4 md:pt-0 md:px-4">
-          <div className="flex items-center space-x-1.5 text-[10px] font-mono text-[#8D98A3] uppercase tracking-wider mb-1">
-            <Wind className="w-3 h-3 text-[#E27D4F]" />
-            <span>Maximum Volume Shock</span>
+        {/* Column 2: Largest Miss */}
+        <div className="pt-4 md:pt-0 md:px-6 space-y-2">
+          <span className="text-[11px] font-medium tracking-wider uppercase text-[#8B9692] block">
+            Largest Miss
+          </span>
+          <div className="text-3xl font-mono font-bold text-[#18201F] tabular-nums">
+            {worstAbsError.toLocaleString()}{' '}
+            <span className="text-sm font-normal text-[#8B9692]">MW</span>
           </div>
-          <div className="text-2xl font-mono font-bold text-[#17202A] tracking-tight my-1 tabular-nums">
-            {(summary.worstErrorEvent?.absoluteErrorMW ?? 7819).toLocaleString()} <span className="text-xs font-normal text-[#8D98A3]">MW</span>
-          </div>
-          <h4 className="text-xs font-semibold text-[#17202A] mt-2 mb-1">
-            Storm Dudley Ramp Inversion
-          </h4>
-          <p className="text-xs text-[#66717C] leading-relaxed">
-            Storm gust fronts and turbine high-wind cutouts caused sudden severe volume drops on 15–16 Jan, penalizing unhedged short positions.
+          <span className="text-[11px] font-mono font-semibold tracking-wider uppercase text-[#8B9692] block">
+            15 JAN · 18:30 GMT (STORM DUDLEY)
+          </span>
+          <p className="text-xs text-[#687370] leading-relaxed pt-1">
+            Frontal passage caused rapid high-wind cut-out protection across northern offshore wind arrays, creating sudden volume shortfall.
           </p>
         </div>
 
-        {/* Statement 3: Diurnal Volatility */}
-        <div className="pt-4 md:pt-0 md:px-4">
-          <div className="flex items-center space-x-1.5 text-[10px] font-mono text-[#8D98A3] uppercase tracking-wider mb-1">
-            <Clock className="w-3 h-3 text-[#E6B84F]" />
-            <span>Evening Peak Error</span>
+        {/* Column 3: P90 Uncertainty */}
+        <div className="pt-4 md:pt-0 md:px-6 space-y-2">
+          <span className="text-[11px] font-medium tracking-wider uppercase text-[#8B9692] block">
+            P90 Uncertainty
+          </span>
+          <div className="text-3xl font-mono font-bold text-[#D5A83E] tabular-nums">
+            ±{p90.toLocaleString()}{' '}
+            <span className="text-sm font-normal text-[#8B9692]">MW</span>
           </div>
-          <div className="text-2xl font-mono font-bold text-[#E27D4F] tracking-tight my-1 tabular-nums">
-            ±2,240 <span className="text-xs font-normal text-[#8D98A3]">MW</span>
-          </div>
-          <h4 className="text-xs font-semibold text-[#17202A] mt-2 mb-1">
-            Evening Ramp (17:00–19:00)
-          </h4>
-          <p className="text-xs text-[#66717C] leading-relaxed">
-            Forecast uncertainty peaks coincident with high system demand, multiplying cashout exposure during premium peak-load hours.
+          <span className="text-[11px] font-mono font-semibold tracking-wider uppercase text-[#8B9692] block">
+            90% VARIANCE BUFFER
+          </span>
+          <p className="text-xs text-[#687370] leading-relaxed pt-1">
+            The highest-risk periods occurred during rapidly changing frontal transitions and diurnal evening demand ramps (17:00–19:00).
           </p>
         </div>
 
-        {/* Statement 4: Horizon Value */}
-        <div className="pt-4 md:pt-0 md:pl-4">
-          <div className="flex items-center space-x-1.5 text-[10px] font-mono text-[#8D98A3] uppercase tracking-wider mb-1">
-            <Compass className="w-3 h-3 text-[#168F79]" />
-            <span>Lead Horizon Decay</span>
+        {/* Column 4: Horizon Convergence */}
+        <div className="pt-4 md:pt-0 md:pl-6 space-y-2">
+          <span className="text-[11px] font-medium tracking-wider uppercase text-[#8B9692] block">
+            Horizon Convergence
+          </span>
+          <div className="text-3xl font-mono font-bold text-[#087F6A] tabular-nums">
+            −28.5%{' '}
+            <span className="text-sm font-normal text-[#8B9692]">MAE</span>
           </div>
-          <div className="text-2xl font-mono font-bold text-[#168F79] tracking-tight my-1 tabular-nums">
-            -28.5% <span className="text-xs font-normal text-[#8D98A3]">MAE</span>
-          </div>
-          <h4 className="text-xs font-semibold text-[#17202A] mt-2 mb-1">
-            Convergence Near Gate Closure
-          </h4>
-          <p className="text-xs text-[#66717C] leading-relaxed">
-            Rolling WINDFOR revisions converge rapidly in the final 8 hours, proving high value in continuous intraday trading adjustment.
+          <span className="text-[11px] font-mono font-semibold tracking-wider uppercase text-[#8B9692] block">
+            LEAD TIME REFINEMENT
+          </span>
+          <p className="text-xs text-[#687370] leading-relaxed pt-1">
+            Rolling WINDFOR revisions steadily improve accuracy, with error dropping by ~680 MW between D-2 and final auction gate closure.
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };

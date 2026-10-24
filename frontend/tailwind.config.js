@@ -8,28 +8,23 @@ export default {
     extend: {
       colors: {
         canvas: {
-          bg: '#F4F6F8',
-          secondary: '#EEF1F4',
-          solid: '#FFFFFF',
-          border: '#E4E8EC',
-          borderLight: '#EDF0F3',
-          divider: '#E4E8EC',
+          bg: '#EEF2F1',
+          surface: '#FFFFFF',
+          divider: '#DCE3E0',
+          dividerLight: '#E8EDEA',
         },
         ink: {
-          primary: '#17202A',
-          secondary: '#66717C',
-          muted: '#8D98A3',
-          subtle: '#B2BAC2',
+          primary: '#18201F',
+          secondary: '#687370',
+          muted: '#8B9692',
+          faint: '#B0B9B6',
         },
-        energy: {
-          actual: '#168F79',        // Muted emerald / teal
-          actualLight: '#23A890',
-          forecast: '#E27D4F',      // Soft coral / orange
-          forecastLight: '#EE946C',
-          uncertainty: '#E6B84F',   // Warm muted yellow
-          error: '#D95C55',         // Soft red-orange
-          positive: '#3D9B76',      // Positive / good
-          neutral: '#66717C',       // Neutral
+        terminal: {
+          emerald: '#087F6A',      // Actual Wind
+          terracotta: '#C96A3D',   // Forecast
+          ochre: '#D5A83E',        // Uncertainty
+          red: '#C84B4B',          // Forecast Error
+          subtleGreen: '#8BAFA7',
         }
       },
       fontFamily: {
@@ -37,16 +32,10 @@ export default {
         mono: ['Geist Mono', 'JetBrains Mono', 'monospace'],
       },
       boxShadow: {
-        'glass-sm': '0 4px 16px 0 rgba(23, 32, 42, 0.04)',
-        'glass-md': '0 8px 32px 0 rgba(23, 32, 42, 0.06)',
-        'glass-lg': '0 16px 40px 0 rgba(23, 32, 42, 0.09)',
-        'glass-float': '0 20px 48px -8px rgba(23, 32, 42, 0.12)',
+        'terminal-sm': '0 1px 3px 0 rgba(24, 32, 31, 0.04), 0 1px 2px -1px rgba(24, 32, 31, 0.04)',
+        'terminal-md': '0 4px 16px -2px rgba(24, 32, 31, 0.05), 0 2px 6px -2px rgba(24, 32, 31, 0.03)',
+        'terminal-lg': '0 12px 28px -4px rgba(24, 32, 31, 0.06), 0 4px 10px -2px rgba(24, 32, 31, 0.02)',
       },
-      backdropBlur: {
-        xs: '4px',
-        glass: '20px',
-        heavy: '28px',
-      }
     },
   },
   plugins: [],

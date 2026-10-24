@@ -3,7 +3,6 @@ import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import { motion } from 'motion/react';
 import { TimeSeriesPoint } from '../../types';
-import { Shield, AlertCircle } from 'lucide-react';
 
 interface HeroChartProps {
   series: TimeSeriesPoint[];
@@ -12,8 +11,6 @@ interface HeroChartProps {
 
 export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPeriod }) => {
   const [rangeFilter, setRangeFilter] = useState<'ALL' | 'W1' | 'W2' | 'W3' | 'W4' | 'STORM'>('ALL');
-  const [showUncertainty, setShowUncertainty] = useState<boolean>(true);
-  const [showSevereErrors, setShowSevereErrors] = useState<boolean>(true);
 
   // Filter series based on selected preset
   const filteredData = useMemo(() => {
@@ -50,7 +47,7 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
     [filteredData]
   );
 
-  // Uncertainty Corridor (±1,850 MW around forecast)
+  // Uncertainty Corridor (±1,850 MW standard uncertainty)
   const uncertaintyLower = useMemo(
     () =>
       filteredData.map((d) => {
@@ -71,133 +68,36 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
     [filteredData]
   );
 
-  // Severe Error Callouts (|Error| >= 2,800 MW)
+  // Severe Error Callouts: Only for statistically significant misses (|Error| >= 3,200 MW)
   const severeErrorMarkPoints = useMemo(() => {
-    if (!showSevereErrors) return [];
     const points: any[] = [];
     filteredData.forEach((d, idx) => {
-      if (d.absoluteErrorMW && d.absoluteErrorMW >= 2800) {
-        // Only mark peak local extremes so chart remains clean
-        if (idx % 3 === 0) {
+      if (d.absoluteErrorMW && d.absoluteErrorMW >= 3200) {
+        if (idx % 4 === 0) {
           points.push({
-            name: 'Severe Deviation',
+            name: 'Significant Miss',
             coord: [timeLabels[idx], d.actualGenerationMW],
             value: `${Math.round(d.absoluteErrorMW).toLocaleString()} MW`,
-            itemStyle: { color: '#D95C55' },
+            itemStyle: { color: '#C84B4B' },
           });
         }
       }
     });
     return points;
-  }, [filteredData, timeLabels, showSevereErrors]);
+  }, [filteredData, timeLabels]);
 
-  // ECharts Option Configuration: Premium Light Financial / Energy Terminal
+  // ECharts Option: Financial Market Terminal Architecture
   const option = useMemo(() => {
-    const seriesList: any[] = [];
-
-    // 1. Uncertainty Confidence Band (Stacked area)
-    if (showUncertainty) {
-      seriesList.push(
-        {
-          name: 'Uncertainty Lower Base',
-          type: 'line',
-          stack: 'uncertainty-band',
-          symbol: 'none',
-          lineStyle: { opacity: 0 },
-          data: uncertaintyLower,
-          silent: true,
-        },
-        {
-          name: 'Uncertainty Corridor (±P90)',
-          type: 'line',
-          stack: 'uncertainty-band',
-          symbol: 'none',
-          data: uncertaintyBandHeight,
-          lineStyle: {
-            color: 'rgba(230, 184, 79, 0.4)',
-            width: 1,
-            type: 'dashed',
-          },
-          areaStyle: {
-            color: 'rgba(230, 184, 79, 0.12)',
-          },
-          silent: true,
-        }
-      );
-    }
-
-    // 2. Actual Wind Generation (Muted Emerald / Teal)
-    seriesList.push({
-      name: 'Actual Wind Outturn',
-      type: 'line',
-      smooth: 0.25,
-      showSymbol: false,
-      data: actualValues,
-      lineStyle: {
-        width: 2.4,
-        color: '#168F79',
-      },
-      areaStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: 'rgba(22, 143, 121, 0.14)' },
-          { offset: 0.7, color: 'rgba(22, 143, 121, 0.03)' },
-          { offset: 1, color: 'rgba(22, 143, 121, 0.0)' },
-        ]),
-      },
-      emphasis: {
-        lineStyle: {
-          width: 3.2,
-          shadowBlur: 10,
-          shadowColor: 'rgba(22, 143, 121, 0.35)',
-        },
-      },
-      markPoint: {
-        symbol: 'circle',
-        symbolSize: 8,
-        label: {
-          show: false,
-        },
-        data: severeErrorMarkPoints,
-      },
-    });
-
-    // 3. Day-Ahead Forecast (Soft Coral / Orange)
-    seriesList.push({
-      name: 'Day-Ahead Forecast',
-      type: 'line',
-      smooth: 0.25,
-      showSymbol: false,
-      data: forecastValues,
-      lineStyle: {
-        width: 2.0,
-        color: '#E27D4F',
-        type: [6, 4],
-      },
-      areaStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: 'rgba(226, 125, 79, 0.06)' },
-          { offset: 1, color: 'rgba(226, 125, 79, 0.0)' },
-        ]),
-      },
-      emphasis: {
-        lineStyle: {
-          width: 2.8,
-          shadowBlur: 10,
-          shadowColor: 'rgba(226, 125, 79, 0.35)',
-        },
-      },
-    });
-
     return {
       backgroundColor: 'transparent',
       animation: true,
-      animationDuration: 450,
+      animationDuration: 400,
       animationEasing: 'cubicOut',
       grid: {
-        top: 30,
-        right: 25,
-        bottom: 55,
-        left: 65,
+        top: 24,
+        right: 20,
+        bottom: 50,
+        left: 55,
         containLabel: false,
       },
       tooltip: {
@@ -205,22 +105,22 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         axisPointer: {
           type: 'cross',
           lineStyle: {
-            color: 'rgba(226, 125, 79, 0.45)',
+            color: 'rgba(201, 106, 61, 0.45)',
             width: 1,
             type: 'dashed',
           },
           crossStyle: {
-            color: 'rgba(102, 113, 124, 0.3)',
+            color: 'rgba(104, 115, 112, 0.25)',
           },
         },
         // Floating glass panel tooltip
-        backgroundColor: 'rgba(255, 255, 255, 0.94)',
-        borderColor: 'rgba(228, 232, 236, 0.95)',
+        backgroundColor: 'rgba(255, 255, 255, 0.96)',
+        borderColor: '#DCE3E0',
         borderWidth: 1,
-        extraCssText: 'box-shadow: 0 16px 36px rgba(23, 32, 42, 0.10); backdrop-filter: blur(18px); border-radius: 12px;',
-        padding: [12, 16],
+        extraCssText: 'box-shadow: 0 8px 24px rgba(24, 32, 31, 0.08); backdrop-filter: blur(16px); border-radius: 8px;',
+        padding: [10, 14],
         textStyle: {
-          color: '#17202A',
+          color: '#18201F',
           fontSize: 12,
           fontFamily: 'Geist Mono, JetBrains Mono, monospace',
         },
@@ -230,50 +130,42 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           const record = filteredData[idx];
           if (!record) return '';
 
-          const actual = record.actualGenerationMW?.toLocaleString() ?? 'N/A';
-          const forecast = record.forecastGenerationMW?.toLocaleString() ?? 'N/A';
+          const actual = record.actualGenerationMW?.toLocaleString() ?? '—';
+          const forecast = record.forecastGenerationMW?.toLocaleString() ?? '—';
           const error = record.errorMW ?? 0;
-          const absError = record.absoluteErrorMW?.toLocaleString() ?? 'N/A';
-          const isOver = error < 0;
+          const absError = record.absoluteErrorMW?.toLocaleString() ?? '—';
+          const isSignificant = Math.abs(error) >= 2800;
           const errorSign = error > 0 ? '+' : '';
-          const horizon = record.forecastHorizonHours ? `${record.forecastHorizonHours}h` : 'N/A';
+          const horizon = record.forecastHorizonHours ? `${record.forecastHorizonHours}h` : '—';
+          const time = record.deliveryTime.substring(11, 16);
 
           return `
-            <div style="font-family: 'Geist Mono', monospace; min-width: 220px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E4E8EC; padding-bottom: 6px; margin-bottom: 8px;">
-                <span style="font-weight: 600; color: #17202A; font-size: 11px;">${record.settlementDate} · ${record.deliveryTime.substring(11, 16)} GMT</span>
-                <span style="background: #F4F6F8; border: 1px solid #E4E8EC; color: #66717C; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">SP ${record.settlementPeriod}</span>
+            <div style="font-family: 'Geist Mono', monospace; min-width: 200px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #DCE3E0; padding-bottom: 5px; margin-bottom: 6px;">
+                <span style="font-weight: 600; color: #18201F; font-size: 11px;">${time} · SP ${record.settlementPeriod}</span>
+                <span style="color: #8B9692; font-size: 10px;">${record.settlementDate}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                <span style="color: #168F79; display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#168F79;"></span>
-                  Actual Outturn:
-                </span>
-                <span style="font-weight: 700; color: #17202A;">${actual} MW</span>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                <span style="color: #087F6A; font-weight: 500; font-size: 11px;">ACTUAL</span>
+                <span style="font-weight: 700; color: #18201F;">${actual} MW</span>
               </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color: #E27D4F; display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#E27D4F;"></span>
-                  Day-Ahead Forecast:
-                </span>
-                <span style="font-weight: 700; color: #17202A;">${forecast} MW</span>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color: #C96A3D; font-weight: 500; font-size: 11px;">DAY-AHEAD</span>
+                <span style="font-weight: 700; color: #18201F;">${forecast} MW</span>
               </div>
-              <div style="border-top: 1px solid #E4E8EC; padding-top: 6px; display: flex; justify-content: space-between; font-size: 11px;">
-                <span style="color: #66717C;">Forecast Error:</span>
-                <span style="font-weight: 700; color: ${isOver ? '#D95C55' : '#3D9B76'};">
+              <div style="border-top: 1px solid #E8EDEA; padding-top: 5px; display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #687370;">ERROR</span>
+                <span style="font-weight: 700; color: ${isSignificant ? '#C84B4B' : error < 0 ? '#C96A3D' : '#087F6A'};">
                   ${errorSign}${error.toLocaleString()} MW
                 </span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px;">
-                <span style="color: #8D98A3;">Absolute Error:</span>
-                <span style="color: #17202A; font-weight: 500;">±${absError} MW</span>
+                <span style="color: #8B9692;">ABS ERROR</span>
+                <span style="color: #18201F;">±${absError} MW</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px;">
-                <span style="color: #8D98A3;">Lead Horizon:</span>
-                <span style="color: #66717C;">${horizon}</span>
-              </div>
-              <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #E4E8EC; text-align: center; font-size: 10px; color: #E27D4F; font-weight: 500;">
-                Click to inspect evolution trajectory →
+                <span style="color: #8B9692;">HORIZON</span>
+                <span style="color: #687370;">${horizon}</span>
               </div>
             </div>
           `;
@@ -283,10 +175,10 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         type: 'category',
         data: timeLabels,
         boundaryGap: false,
-        axisLine: { lineStyle: { color: '#E4E8EC' } },
+        axisLine: { lineStyle: { color: '#DCE3E0' } },
         axisTick: { show: false },
         axisLabel: {
-          color: '#8D98A3',
+          color: '#8B9692',
           fontSize: 10,
           fontFamily: 'Geist Mono, monospace',
           interval: Math.floor(timeLabels.length / 8),
@@ -298,12 +190,12 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         axisTick: { show: false },
         splitLine: {
           lineStyle: {
-            color: '#EEF1F4',
+            color: '#E8EDEA',
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: '#8D98A3',
+          color: '#8B9692',
           fontSize: 10,
           fontFamily: 'Geist Mono, monospace',
           formatter: (value: number) => `${(value / 1000).toFixed(0)}k MW`,
@@ -314,21 +206,21 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           type: 'slider',
           show: true,
           xAxisIndex: 0,
-          bottom: 8,
-          height: 18,
+          bottom: 6,
+          height: 16,
           borderColor: 'transparent',
-          backgroundColor: '#F4F6F8',
-          fillerColor: 'rgba(226, 125, 79, 0.15)',
+          backgroundColor: '#EEF2F1',
+          fillerColor: 'rgba(201, 106, 61, 0.14)',
           handleStyle: {
-            color: '#E27D4F',
+            color: '#C96A3D',
             borderColor: '#FFFFFF',
-            borderWidth: 1.5,
+            borderWidth: 1,
           },
           moveHandleStyle: {
-            color: '#CBD2D9',
+            color: '#CBD5D2',
           },
           textStyle: {
-            color: '#8D98A3',
+            color: '#8B9692',
             fontSize: 9,
             fontFamily: 'Geist Mono, monospace',
           },
@@ -339,9 +231,86 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           zoomOnMouseWheel: 'ctrl',
         },
       ],
-      series: seriesList,
+      series: [
+        // 1. Uncertainty Confidence Corridor (Ochre @ 10% opacity)
+        {
+          name: 'Uncertainty Lower Base',
+          type: 'line',
+          stack: 'uncertainty',
+          symbol: 'none',
+          lineStyle: { opacity: 0 },
+          data: uncertaintyLower,
+          silent: true,
+        },
+        {
+          name: 'Uncertainty Corridor',
+          type: 'line',
+          stack: 'uncertainty',
+          symbol: 'none',
+          data: uncertaintyBandHeight,
+          lineStyle: {
+            color: 'rgba(213, 168, 62, 0.35)',
+            width: 1,
+            type: 'dashed',
+          },
+          areaStyle: {
+            color: 'rgba(213, 168, 62, 0.09)',
+          },
+          silent: true,
+        },
+
+        // 2. Actual Wind Generation (Emerald #087F6A)
+        {
+          name: 'Actual Generation',
+          type: 'line',
+          smooth: 0.25,
+          showSymbol: false,
+          data: actualValues,
+          lineStyle: {
+            width: 2.2,
+            color: '#087F6A',
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(8, 127, 106, 0.08)' },
+              { offset: 0.8, color: 'rgba(8, 127, 106, 0.01)' },
+              { offset: 1, color: 'transparent' },
+            ]),
+          },
+          emphasis: {
+            lineStyle: {
+              width: 3.0,
+            },
+          },
+          markPoint: {
+            symbol: 'circle',
+            symbolSize: 6,
+            label: { show: false },
+            data: severeErrorMarkPoints,
+          },
+        },
+
+        // 3. Day-Ahead Forecast (Terracotta #C96A3D)
+        {
+          name: 'Day-Ahead Forecast',
+          type: 'line',
+          smooth: 0.25,
+          showSymbol: false,
+          data: forecastValues,
+          lineStyle: {
+            width: 1.8,
+            color: '#C96A3D',
+            type: [5, 4],
+          },
+          emphasis: {
+            lineStyle: {
+              width: 2.5,
+            },
+          },
+        },
+      ],
     };
-  }, [timeLabels, actualValues, forecastValues, uncertaintyLower, uncertaintyBandHeight, severeErrorMarkPoints, filteredData, showUncertainty]);
+  }, [timeLabels, actualValues, forecastValues, uncertaintyLower, uncertaintyBandHeight, severeErrorMarkPoints, filteredData]);
 
   const onChartClick = (params: any) => {
     if (params && params.dataIndex !== undefined && onSelectPeriod) {
@@ -358,80 +327,50 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
     { id: 'W2', label: 'Week 2' },
     { id: 'W3', label: 'Week 3' },
     { id: 'W4', label: 'Week 4' },
-    { id: 'STORM', label: 'Storm Peak (14–17 Jan)' },
+    { id: 'STORM', label: 'Storm Peak' },
   ] as const;
 
   return (
-    <div className="solid-data-surface rounded-2xl p-6 shadow-glass-md relative">
-      {/* Chart Top Header & Range Controls */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
+    <div className="terminal-surface rounded-xl p-6 shadow-terminal-sm">
+      {/* Top Header & Range Segmented Selector */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#168F79]" />
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#17202A]">
-              Actual Generation Outturn vs. Day-Ahead Forecast
-            </h2>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white text-[#E27D4F] border border-[#E4E8EC] shadow-glass-sm font-semibold">
-              ECharts Precision Canvas
-            </span>
-          </div>
-          <p className="text-xs text-[#66717C] mt-1 font-mono">
-            30-minute metered transmission feed (Emerald) vs. D-1 gate commitment (Coral) with uncertainty envelope
+          <h2 className="text-xs font-semibold tracking-wider uppercase text-[#18201F]">
+            Actual vs Day-Ahead Forecast
+          </h2>
+          <p className="text-xs text-[#8B9692] mt-0.5">
+            30-minute UK wind generation · January 2026
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Layer Visibility Toggles */}
-          <div className="flex items-center space-x-1.5 bg-[#F4F6F8] border border-[#E4E8EC] rounded-lg p-1 text-[11px] font-mono">
-            <button
-              onClick={() => setShowUncertainty(!showUncertainty)}
-              className={`flex items-center space-x-1 px-2 py-1 rounded-md transition-all ${
-                showUncertainty ? 'bg-white text-[#E6B84F] shadow-sm font-semibold' : 'text-[#8D98A3] hover:text-[#17202A]'
-              }`}
-            >
-              <Shield className="w-3 h-3" />
-              <span>Uncertainty</span>
-            </button>
-            <button
-              onClick={() => setShowSevereErrors(!showSevereErrors)}
-              className={`flex items-center space-x-1 px-2 py-1 rounded-md transition-all ${
-                showSevereErrors ? 'bg-white text-[#D95C55] shadow-sm font-semibold' : 'text-[#8D98A3] hover:text-[#17202A]'
-              }`}
-            >
-              <AlertCircle className="w-3 h-3" />
-              <span>Errors</span>
-            </button>
-          </div>
-
-          {/* Range Selectors with Shared Motion Pill */}
-          <div className="flex items-center space-x-1 bg-[#F4F6F8] border border-[#E4E8EC] rounded-lg p-1 text-xs font-mono">
-            {rangeButtons.map((btn) => {
-              const isSelected = rangeFilter === btn.id;
-              return (
-                <button
-                  key={btn.id}
-                  onClick={() => setRangeFilter(btn.id)}
-                  className={`relative px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
-                    isSelected ? 'text-[#17202A] font-semibold' : 'text-[#66717C] hover:text-[#17202A]'
-                  }`}
-                >
-                  <span className="relative z-10">{btn.label}</span>
-                  {isSelected && (
-                    <motion.div
-                      layoutId="activeRangePill"
-                      className="absolute inset-0 bg-white rounded-md shadow-glass-sm border border-white"
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        {/* Subtle Segmented Selector */}
+        <div className="flex items-center space-x-0.5 bg-[#EEF2F1] rounded-lg p-0.5 border border-[#DCE3E0] text-xs">
+          {rangeButtons.map((btn) => {
+            const isSelected = rangeFilter === btn.id;
+            return (
+              <button
+                key={btn.id}
+                onClick={() => setRangeFilter(btn.id)}
+                className={`relative px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                  isSelected ? 'text-[#18201F] font-semibold' : 'text-[#687370] hover:text-[#18201F]'
+                }`}
+              >
+                <span className="relative z-10">{btn.label}</span>
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeRangePill"
+                    className="absolute inset-0 bg-white rounded-md shadow-terminal-sm border border-[#DCE3E0]/70"
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Main ECharts Canvas Surface (Opaque crisp white for maximum optical clarity) */}
-      <div className="w-full h-[450px]">
+      {/* Main ECharts Canvas Surface (Dominant 500px vertical space) */}
+      <div className="w-full h-[500px]">
         <ReactECharts
           option={option}
           style={{ height: '100%', width: '100%' }}
@@ -441,29 +380,25 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         />
       </div>
 
-      {/* Chart Legend & Context Footnote */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] font-mono text-[#66717C] pt-3 border-t border-[#E4E8EC] mt-2 gap-2">
-        <div className="flex flex-wrap items-center gap-4">
+      {/* Minimal Bottom Legend (No Implementation Jargon) */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-[#687370] pt-3 border-t border-[#DCE3E0] mt-1 gap-2">
+        <div className="flex flex-wrap items-center gap-5">
           <div className="flex items-center space-x-1.5">
-            <span className="w-3 h-1 rounded-sm bg-[#168F79] inline-block" />
-            <span className="text-[#17202A] font-medium">Actual Outturn (Emerald · FUELHH)</span>
+            <span className="w-2.5 h-1 rounded-xs bg-[#087F6A] inline-block" />
+            <span className="text-[#18201F] font-medium">Actual</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-3 h-0.5 border-t-2 border-dashed border-[#E27D4F] inline-block" />
-            <span className="text-[#17202A] font-medium">Day-Ahead Forecast (Coral · WINDFOR D-1)</span>
+            <span className="w-2.5 h-0.5 border-t-2 border-dashed border-[#C96A3D] inline-block" />
+            <span className="text-[#18201F] font-medium">Day-Ahead Forecast</span>
           </div>
-          {showUncertainty && (
-            <div className="flex items-center space-x-1.5">
-              <span className="w-3 h-2 rounded-sm bg-[#E6B84F]/30 border border-[#E6B84F] inline-block" />
-              <span className="text-[#66717C]">Uncertainty Band (±P90 Corridor)</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2.5 h-1.5 rounded-xs bg-[#D5A83E]/25 border border-[#D5A83E] inline-block" />
+            <span>Uncertainty Corridor</span>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-3 text-[#8D98A3]">
-          <span>{filteredData.length} Settlement Records</span>
-          <span className="text-[#CBD2D9]">·</span>
-          <span className="text-[#E27D4F] font-medium">Click point to open evolution</span>
+        <div className="text-[11px] text-[#8B9692]">
+          <span>{filteredData.length} Settlement Records · Click any point to open evolution</span>
         </div>
       </div>
     </div>

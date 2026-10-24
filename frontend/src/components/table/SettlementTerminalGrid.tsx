@@ -71,43 +71,39 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
   }, [tableData, search, errorFilter]);
 
   return (
-    <div className="solid-data-surface rounded-2xl p-6 shadow-glass-md space-y-4">
+    <div className="terminal-surface rounded-xl p-6 shadow-terminal-sm space-y-4">
       {/* Top Header & Filter Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E4E8EC] pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#DCE3E0] pb-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#E27D4F]" />
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#17202A]">
-              Settlement Period Reconciliation Terminal
-            </h2>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F4F6F8] text-[#E27D4F] border border-[#E4E8EC] font-semibold">
-              30-min Audit Feed
-            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C96A3D]" />
+            <h3 className="text-xs font-semibold tracking-wider uppercase text-[#18201F]">
+              Settlement Reconciliation Terminal
+            </h3>
+            <span className="text-[#DCE3E0]">·</span>
+            <span className="text-xs text-[#8B9692]">30-Minute Elexon Audit Log</span>
           </div>
-          <p className="text-xs text-[#66717C] mt-1 font-mono">
-            Granular reconciliation of Elexon FUELHH actuals vs. WINDFOR day-ahead commitments
+          <p className="text-xs text-[#687370] mt-0.5">
+            Granular reconciliation of Elexon metered actuals vs. WINDFOR day-ahead commitments
           </p>
         </div>
 
         {/* Global CSV Export & Filter Group */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Search Box */}
-          <div className="flex items-center bg-[#F4F6F8] border border-[#E4E8EC] rounded-lg p-1 text-[11px] shadow-glass-sm">
-            <span className="text-[#8D98A3] px-2 flex items-center gap-1 font-mono">
-              <Search className="w-3 h-3" />
-            </span>
+          <div className="flex items-center bg-[#EEF2F1] border border-[#DCE3E0] rounded-md px-2 py-1 text-xs">
+            <Search className="w-3 h-3 text-[#8B9692] mr-1.5" />
             <input
               type="text"
               placeholder="Filter date or SP..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent text-[#17202A] placeholder-[#8D98A3] focus:outline-none font-mono w-44 text-xs"
+              className="bg-transparent text-[#18201F] placeholder-[#8B9692] focus:outline-none font-mono w-36 text-xs"
             />
           </div>
 
           {/* Quick Error Severity Filters */}
-          <div className="flex items-center bg-[#F4F6F8] border border-[#E4E8EC] rounded-lg p-1 text-[11px] font-mono shadow-glass-sm">
-            <SlidersHorizontal className="w-3 h-3 text-[#8D98A3] mx-1.5" />
+          <div className="flex items-center bg-[#EEF2F1] border border-[#DCE3E0] rounded-md p-0.5 text-xs">
             {(['all', 'severe', 'surplus', 'shortfall'] as const).map((filter) => (
               <button
                 key={filter}
@@ -115,10 +111,10 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
                   setErrorFilter(filter);
                   setPage(1);
                 }}
-                className={`px-2 py-0.5 rounded-md capitalize transition-all ${
+                className={`px-2 py-0.5 rounded text-[11px] capitalize transition-all ${
                   errorFilter === filter
-                    ? 'bg-white text-[#17202A] font-semibold shadow-sm'
-                    : 'text-[#8D98A3] hover:text-[#17202A]'
+                    ? 'bg-white text-[#18201F] font-semibold shadow-terminal-sm'
+                    : 'text-[#687370] hover:text-[#18201F]'
                 }`}
               >
                 {filter}
@@ -129,73 +125,73 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
           {/* Export CSV Button */}
           <button
             onClick={handleExportCSV}
-            className="flex items-center space-x-1.5 bg-white hover:bg-[#F4F6F8] border border-[#E4E8EC] text-[#E27D4F] font-semibold px-3 py-1.5 rounded-lg text-xs transition-all shadow-glass-sm cursor-pointer"
+            className="flex items-center space-x-1.5 bg-white hover:bg-[#EEF2F1] border border-[#DCE3E0] text-[#18201F] font-semibold px-3 py-1 rounded-md text-xs transition-all shadow-terminal-sm cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 text-[#C96A3D]" />
             <span>Export CSV</span>
           </button>
         </div>
       </div>
 
       {/* Grid Table */}
-      <div className="border border-[#E4E8EC] rounded-xl overflow-x-auto shadow-glass-sm">
+      <div className="border border-[#DCE3E0] rounded-lg overflow-x-auto">
         <table className="w-full text-left font-mono text-xs">
-          <thead className="bg-[#F4F6F8] text-[#8D98A3] border-b border-[#E4E8EC] select-none text-[10px] uppercase">
+          <thead className="bg-[#EEF2F1] text-[#8B9692] border-b border-[#DCE3E0] select-none text-[10px] uppercase">
             <tr>
               <th
                 onClick={() => handleSort('deliveryTime')}
-                className="py-2.5 px-3.5 cursor-pointer hover:text-[#17202A]"
+                className="py-2.5 px-3.5 cursor-pointer hover:text-[#18201F]"
               >
                 <div className="flex items-center space-x-1">
                   <span>Delivery GMT</span>
-                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8D98A3]" />
+                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8B9692]" />
                 </div>
               </th>
               <th className="py-2.5 px-3 text-center">SP</th>
               <th
                 onClick={() => handleSort('actualGenerationMW')}
-                className="py-2.5 px-3.5 cursor-pointer hover:text-[#17202A] text-right"
+                className="py-2.5 px-3.5 cursor-pointer hover:text-[#18201F] text-right"
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Actual (MW)</span>
-                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8D98A3]" />
+                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8B9692]" />
                 </div>
               </th>
               <th
                 onClick={() => handleSort('forecastGenerationMW')}
-                className="py-2.5 px-3.5 cursor-pointer hover:text-[#17202A] text-right"
+                className="py-2.5 px-3.5 cursor-pointer hover:text-[#18201F] text-right"
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Forecast (MW)</span>
-                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8D98A3]" />
+                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8B9692]" />
                 </div>
               </th>
               <th
                 onClick={() => handleSort('errorMW')}
-                className="py-2.5 px-3.5 cursor-pointer hover:text-[#17202A] text-right"
+                className="py-2.5 px-3.5 cursor-pointer hover:text-[#18201F] text-right"
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Signed Error</span>
-                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8D98A3]" />
+                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8B9692]" />
                 </div>
               </th>
               <th
                 onClick={() => handleSort('absoluteErrorMW')}
-                className="py-2.5 px-3.5 cursor-pointer hover:text-[#17202A] text-right"
+                className="py-2.5 px-3.5 cursor-pointer hover:text-[#18201F] text-right"
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Absolute |Err|</span>
-                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8D98A3]" />
+                  <ArrowUpDown className="w-2.5 h-2.5 text-[#8B9692]" />
                 </div>
               </th>
               <th className="py-2.5 px-3 text-center">Lead Horizon</th>
-              <th className="py-2.5 px-3.5 text-center">Desk Risk Class</th>
+              <th className="py-2.5 px-3.5 text-center">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E4E8EC] text-[#66717C]">
+          <tbody className="divide-y divide-[#E8EDEA] text-[#687370]">
             {isLoading ? (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-[#8D98A3]">
+                <td colSpan={8} className="py-8 text-center text-[#8B9692]">
                   Querying Elexon settlement engine records...
                 </td>
               </tr>
@@ -203,57 +199,54 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
               displayedRecords.map((row: TimeSeriesPoint) => {
                 const absErr = row.absoluteErrorMW ?? 0;
                 const isSevere = absErr >= 2500;
-                const isUnder = (row.errorMW ?? 0) < 0; // Negative error = forecast > actual (over-forecast shortfall)
+                const isUnder = (row.errorMW ?? 0) < 0; // Negative error = forecast > actual (shortfall)
                 const errorSign = (row.errorMW ?? 0) > 0 ? '+' : '';
 
                 return (
                   <tr
                     key={row.deliveryTime}
                     onClick={() => onSelectPeriod && onSelectPeriod(row.deliveryTime)}
-                    className="hover:bg-[#F4F6F8] cursor-pointer transition-colors"
+                    className="hover:bg-[#EEF2F1] cursor-pointer transition-colors"
                   >
-                    <td className="py-2.5 px-3.5 text-[#17202A] font-medium">
+                    <td className="py-2 px-3.5 text-[#18201F] font-medium">
                       {row.settlementDate} {row.deliveryTime.substring(11, 16)}
                     </td>
-                    <td className="py-2.5 px-3 text-center text-[#8D98A3]">{row.settlementPeriod}</td>
-                    <td className="py-2.5 px-3.5 text-right text-[#168F79] font-semibold tabular-nums">
+                    <td className="py-2 px-3 text-center text-[#8B9692]">{row.settlementPeriod}</td>
+                    <td className="py-2 px-3.5 text-right text-[#087F6A] font-semibold tabular-nums">
                       {row.actualGenerationMW?.toLocaleString() ?? '—'}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right text-[#E27D4F] font-semibold tabular-nums">
+                    <td className="py-2 px-3.5 text-right text-[#C96A3D] font-semibold tabular-nums">
                       {row.forecastGenerationMW?.toLocaleString() ?? '—'}
                     </td>
                     <td
-                      className={`py-2.5 px-3.5 text-right font-semibold tabular-nums ${
-                        isUnder ? 'text-[#D95C55]' : 'text-[#3D9B76]'
+                      className={`py-2 px-3.5 text-right font-semibold tabular-nums ${
+                        isUnder ? 'text-[#C96A3D]' : 'text-[#087F6A]'
                       }`}
                     >
                       {row.errorMW !== null && row.errorMW !== undefined
                         ? `${errorSign}${row.errorMW.toLocaleString()}`
                         : '—'}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right text-[#17202A] tabular-nums">
+                    <td className="py-2 px-3.5 text-right text-[#18201F] tabular-nums">
                       {row.absoluteErrorMW !== null && row.absoluteErrorMW !== undefined
                         ? row.absoluteErrorMW.toLocaleString()
                         : '—'}
                     </td>
-                    <td className="py-2.5 px-3 text-center text-[#8D98A3]">
+                    <td className="py-2 px-3 text-center text-[#8B9692]">
                       {row.forecastHorizonHours ? `${row.forecastHorizonHours}h` : '—'}
                     </td>
-                    <td className="py-2.5 px-3.5 text-center">
+                    <td className="py-2 px-3.5 text-center">
                       {isSevere ? (
-                        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#D95C55]/10 border border-[#D95C55]/30 text-[#D95C55]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#D95C55]" />
+                        <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#C84B4B]/10 text-[#C84B4B]">
                           <span>Severe Miss</span>
                         </span>
                       ) : absErr < 1000 ? (
-                        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#168F79]/10 border border-[#168F79]/30 text-[#168F79]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#168F79]" />
+                        <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#087F6A]/10 text-[#087F6A]">
                           <span>Balanced</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#E27D4F]/10 border border-[#E27D4F]/30 text-[#E27D4F]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#E27D4F]" />
-                          <span>Standard Deviation</span>
+                        <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#8B9692]">
+                          <span>Nominal</span>
                         </span>
                       )}
                     </td>
@@ -262,7 +255,7 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
               })
             ) : (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-[#8D98A3]">
+                <td colSpan={8} className="py-8 text-center text-[#8B9692]">
                   No matching settlement period records found.
                 </td>
               </tr>
@@ -273,11 +266,11 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
 
       {/* Pagination Controls */}
       {tableData && (
-        <div className="flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-[#66717C] pt-2 gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-[#687370] pt-2 gap-3">
           <div>
             Showing {(page - 1) * pageSize + 1}–
             {Math.min(page * pageSize, tableData.totalCount)} of{' '}
-            <strong className="text-[#17202A]">{tableData.totalCount.toLocaleString()}</strong> settlement periods
+            <strong className="text-[#18201F]">{tableData.totalCount.toLocaleString()}</strong> settlement periods
           </div>
 
           <div className="flex items-center space-x-3">
@@ -289,7 +282,7 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
                   setPageSize(Number(e.target.value));
                   setPage(1);
                 }}
-                className="bg-white border border-[#E4E8EC] text-[#17202A] rounded-md px-2 py-1 focus:outline-none shadow-glass-sm"
+                className="bg-white border border-[#DCE3E0] text-[#18201F] rounded px-2 py-0.5 focus:outline-none"
               >
                 <option value={25}>25</option>
                 <option value={50}>50</option>
@@ -301,17 +294,17 @@ export const SettlementTerminalGrid: React.FC<TerminalGridProps> = ({
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="px-2.5 py-1 rounded-md border border-[#E4E8EC] bg-white hover:bg-[#F4F6F8] disabled:opacity-40 disabled:cursor-not-allowed text-[#17202A] shadow-glass-sm"
+                className="px-2 py-0.5 rounded border border-[#DCE3E0] bg-white hover:bg-[#EEF2F1] disabled:opacity-40 disabled:cursor-not-allowed text-[#18201F]"
               >
                 Prev
               </button>
-              <span className="px-2 text-[#17202A] font-semibold">
+              <span className="px-2 text-[#18201F] font-semibold">
                 {page} / {tableData.totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(tableData.totalPages, p + 1))}
                 disabled={page >= tableData.totalPages}
-                className="px-2.5 py-1 rounded-md border border-[#E4E8EC] bg-white hover:bg-[#F4F6F8] disabled:opacity-40 disabled:cursor-not-allowed text-[#17202A] shadow-glass-sm"
+                className="px-2 py-0.5 rounded border border-[#DCE3E0] bg-white hover:bg-[#EEF2F1] disabled:opacity-40 disabled:cursor-not-allowed text-[#18201F]"
               >
                 Next
               </button>

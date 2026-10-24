@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import ReactECharts from 'echarts-for-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../../services/api';
-import { GitCommit, History, Sliders, Play, CheckCircle } from 'lucide-react';
+import { GitCommit, History, Sliders, ChevronRight } from 'lucide-react';
 
 interface ScrubberProps {
   initialDeliveryTime?: string;
@@ -22,11 +22,11 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
   });
 
   const presets = [
-    { label: 'Jan 15 · 18:00 GMT (Storm Dudley Evening Peak)', value: '2026-01-15T18:00:00Z' },
-    { label: 'Jan 01 · 00:00 GMT (New Year SP 1 Baseline)', value: '2026-01-01T00:00:00Z' },
-    { label: 'Jan 10 · 12:00 GMT (Mid-Month Noon Ramp)', value: '2026-01-10T12:00:00Z' },
-    { label: 'Jan 20 · 08:00 GMT (Morning Demand Ramp)', value: '2026-01-20T08:00:00Z' },
-    { label: 'Jan 28 · 20:00 GMT (Late Month Gale Event)', value: '2026-01-28T20:00:00Z' },
+    { label: '15 Jan · 18:00 GMT (Storm Dudley Peak)', value: '2026-01-15T18:00:00Z' },
+    { label: '01 Jan · 00:00 GMT (New Year SP 1 Baseline)', value: '2026-01-01T00:00:00Z' },
+    { label: '10 Jan · 12:00 GMT (Mid-Month Noon Ramp)', value: '2026-01-10T12:00:00Z' },
+    { label: '20 Jan · 08:00 GMT (Morning Demand Ramp)', value: '2026-01-20T08:00:00Z' },
+    { label: '28 Jan · 20:00 GMT (Late Month Gale Event)', value: '2026-01-28T20:00:00Z' },
   ];
 
   // Active run calculation for the scrubber
@@ -40,7 +40,7 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
 
   const activeRun = evolution?.evolutionSeries?.[currentRunIndex];
 
-  // ECharts Step-Chart Configuration: Emerald Actual, Coral Forecast Trajectory
+  // ECharts Step-Chart: Terracotta Trajectory + Emerald Actual Outturn
   const option = useMemo(() => {
     if (!evolution || !evolution.evolutionSeries.length) return {};
 
@@ -57,25 +57,25 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
       backgroundColor: 'transparent',
       animation: true,
       animationDuration: 300,
-      grid: { top: 35, right: 25, bottom: 40, left: 65 },
+      grid: { top: 30, right: 20, bottom: 40, left: 55 },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(255, 255, 255, 0.94)',
-        borderColor: '#E4E8EC',
+        backgroundColor: 'rgba(255, 255, 255, 0.96)',
+        borderColor: '#DCE3E0',
         borderWidth: 1,
-        extraCssText: 'box-shadow: 0 12px 32px rgba(23, 32, 42, 0.10); backdrop-filter: blur(18px); border-radius: 10px;',
-        textStyle: { color: '#17202A', fontFamily: 'Geist Mono, monospace', fontSize: 11 },
+        extraCssText: 'box-shadow: 0 8px 24px rgba(24, 32, 31, 0.08); backdrop-filter: blur(16px); border-radius: 8px;',
+        textStyle: { color: '#18201F', fontFamily: 'Geist Mono, monospace', fontSize: 11 },
         formatter: (params: any) => {
           if (!params || !params.length) return '';
           const idx = params[0].dataIndex;
           const s = evolution.evolutionSeries[idx];
           return `
             <div style="font-family:'Geist Mono',monospace;">
-              <div style="font-weight:600; color:#17202A; margin-bottom:4px;">Published: ${s.publishTime.substring(0, 10)} ${s.publishTime.substring(11, 16)} UTC</div>
-              <div style="color:#66717C; font-size:10px;">Lead Horizon: ${s.horizonHours} hours ahead</div>
-              <div style="color:#E27D4F; font-weight:700; margin-top:4px;">Forecast: ${s.forecastMW.toLocaleString()} MW</div>
-              <div style="color:#8D98A3; font-size:10px;">Revision Delta: ${s.deltaFromPreviousMW > 0 ? '+' : ''}${s.deltaFromPreviousMW.toLocaleString()} MW</div>
-              ${s.deltaFromActualMW !== null && s.deltaFromActualMW !== undefined ? `<div style="color:#168F79; font-size:10px; font-weight:600;">Gap to Final Actual: ${s.deltaFromActualMW > 0 ? '+' : ''}${s.deltaFromActualMW.toLocaleString()} MW</div>` : ''}
+              <div style="font-weight:600; color:#18201F; margin-bottom:4px;">Published: ${s.publishTime.substring(0, 10)} ${s.publishTime.substring(11, 16)} UTC</div>
+              <div style="color:#687370; font-size:10px;">Lead Horizon: ${s.horizonHours} hours ahead</div>
+              <div style="color:#C96A3D; font-weight:700; margin-top:3px;">Forecast: ${s.forecastMW.toLocaleString()} MW</div>
+              <div style="color:#8B9692; font-size:10px;">Revision Delta: ${s.deltaFromPreviousMW > 0 ? '+' : ''}${s.deltaFromPreviousMW.toLocaleString()} MW</div>
+              ${s.deltaFromActualMW !== null && s.deltaFromActualMW !== undefined ? `<div style="color:#087F6A; font-size:10px; font-weight:600;">Gap to Final Actual: ${s.deltaFromActualMW > 0 ? '+' : ''}${s.deltaFromActualMW.toLocaleString()} MW</div>` : ''}
             </div>
           `;
         },
@@ -83,15 +83,15 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
       xAxis: {
         type: 'category',
         data: pubs,
-        axisLine: { lineStyle: { color: '#E4E8EC' } },
+        axisLine: { lineStyle: { color: '#DCE3E0' } },
         axisTick: { show: false },
-        axisLabel: { color: '#8D98A3', fontSize: 10, fontFamily: 'Geist Mono, monospace' },
+        axisLabel: { color: '#8B9692', fontSize: 10, fontFamily: 'Geist Mono, monospace' },
       },
       yAxis: {
         type: 'value',
         axisLine: { show: false },
-        splitLine: { lineStyle: { color: '#EEF1F4', type: 'dashed' } },
-        axisLabel: { color: '#8D98A3', fontSize: 10, formatter: (v: number) => `${(v / 1000).toFixed(0)}k MW` },
+        splitLine: { lineStyle: { color: '#E8EDEA', type: 'dashed' } },
+        axisLabel: { color: '#8B9692', fontSize: 10, formatter: (v: number) => `${(v / 1000).toFixed(0)}k MW` },
       },
       series: [
         {
@@ -99,16 +99,16 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
           type: 'line',
           step: 'end',
           data: forecasts,
-          lineStyle: { color: '#E27D4F', width: 2.2 },
-          itemStyle: { color: '#E27D4F' },
+          lineStyle: { color: '#C96A3D', width: 2 },
+          itemStyle: { color: '#C96A3D' },
           markPoint: activeRun ? {
             symbol: 'pin',
-            symbolSize: 32,
+            symbolSize: 30,
             data: [
               {
                 coord: [pubs[currentRunIndex], activeRun.forecastMW],
                 value: `${activeRun.forecastMW.toLocaleString()} MW`,
-                itemStyle: { color: '#E6B84F' },
+                itemStyle: { color: '#D5A83E' },
               }
             ]
           } : undefined,
@@ -117,14 +117,14 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
             data: [
               {
                 yAxis: actual,
-                lineStyle: { color: '#168F79', type: 'dashed', width: 2 },
+                lineStyle: { color: '#087F6A', type: 'dashed', width: 2 },
                 label: {
-                  formatter: `Actual Outturn (${actual.toLocaleString()} MW)`,
+                  formatter: `Actual Metered (${actual.toLocaleString()} MW)`,
                   position: 'insideStartTop',
-                  color: '#168F79',
+                  color: '#087F6A',
                   fontSize: 10,
                   fontFamily: 'Geist Mono, monospace',
-                  fontWeight: 'bold',
+                  fontWeight: '600',
                 },
               },
             ],
@@ -135,37 +135,36 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
   }, [evolution, activeRun, currentRunIndex]);
 
   return (
-    <div className="solid-data-surface rounded-2xl p-6 sm:p-7 shadow-glass-md space-y-6">
-      {/* Top Header & Presets */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-[#E4E8EC] pb-4">
+    <div className="terminal-surface rounded-xl p-6 shadow-terminal-sm space-y-6">
+      {/* Top Header & Delivery Period Selector */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#DCE3E0] pb-4">
         <div>
           <div className="flex items-center space-x-2">
-            <GitCommit className="w-4 h-4 text-[#E27D4F]" />
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#17202A]">
-              Forecast Evolution Trajectory (Time-Machine)
-            </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white text-[#E27D4F] border border-[#E4E8EC] shadow-glass-sm font-semibold">
-              Multi-Run Convergence
-            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C96A3D]" />
+            <h3 className="text-xs font-semibold tracking-wider uppercase text-[#18201F]">
+              Forecast Evolution Timeline
+            </h3>
+            <span className="text-[#DCE3E0]">·</span>
+            <span className="text-xs text-[#8B9692]">Time-Machine Scrubber</span>
           </div>
-          <p className="text-xs text-[#66717C] mt-1 font-mono">
-            Scrub across consecutive National Grid ESO forecast cycles to observe how estimates converged
+          <p className="text-xs text-[#687370] mt-0.5">
+            Track how rolling National Grid ESO weather updates converged before final gate closure
           </p>
         </div>
 
-        {/* Delivery Timestamp Preset Selector */}
-        <div className="flex items-center space-x-2 text-xs font-mono">
-          <span className="text-[#8D98A3]">Target Delivery:</span>
+        {/* Target Delivery Selector */}
+        <div className="flex items-center space-x-2 text-xs">
+          <span className="text-[#8B9692]">Target Delivery:</span>
           <select
             value={deliveryTime}
             onChange={(e) => {
               setDeliveryTime(e.target.value);
               setActiveCycleIndex(null);
             }}
-            className="bg-[#F4F6F8] border border-[#E4E8EC] rounded-lg px-3 py-1.5 text-[#17202A] font-semibold focus:outline-none focus:border-[#E27D4F] cursor-pointer shadow-glass-sm"
+            className="bg-white border border-[#DCE3E0] rounded-md px-2.5 py-1 text-[#18201F] font-medium focus:outline-none cursor-pointer shadow-terminal-sm"
           >
             {presets.map((p) => (
-              <option key={p.value} value={p.value} className="bg-white text-[#17202A]">
+              <option key={p.value} value={p.value}>
                 {p.label}
               </option>
             ))}
@@ -174,69 +173,88 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
       </div>
 
       {isLoading ? (
-        <div className="h-[320px] flex items-center justify-center text-xs font-mono text-[#8D98A3]">
+        <div className="h-[280px] flex items-center justify-center text-xs font-mono text-[#8B9692]">
           Reconstructing publication trajectory from Elexon BMRS...
         </div>
       ) : evolution && evolution.evolutionSeries.length > 0 ? (
         <>
-          {/* Interactive Scrubber Control Bar */}
-          <div className="glass-panel rounded-xl p-4 border border-white/80 shadow-glass-sm space-y-3">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono gap-2">
-              <div className="flex items-center space-x-2 text-[#17202A] font-semibold">
-                <Sliders className="w-3.5 h-3.5 text-[#E27D4F]" />
-                <span>Active Model Run: Cycle {currentRunIndex + 1} of {evolution.evolutionSeries.length}</span>
+          {/* Timeline Stages: D-2 -> D-1 -> Gate Closure -> Delivery */}
+          <div className="flex items-center justify-between text-xs text-[#687370] border-b border-[#DCE3E0] pb-3">
+            <div className="flex items-center space-x-1.5">
+              <span className="font-semibold text-[#18201F]">D-2 Long Range</span>
+              <span className="text-[11px] text-[#8B9692]">(48h–72h)</span>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 text-[#DCE3E0]" />
+            <div className="flex items-center space-x-1.5">
+              <span className="font-semibold text-[#18201F]">D-1 Day-Ahead</span>
+              <span className="text-[11px] text-[#8B9692]">(24h–36h)</span>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 text-[#DCE3E0]" />
+            <div className="flex items-center space-x-1.5">
+              <span className="font-semibold text-[#C96A3D]">Gate Closure</span>
+              <span className="text-[11px] text-[#8B9692]">(12:00 UTC)</span>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 text-[#DCE3E0]" />
+            <div className="flex items-center space-x-1.5">
+              <span className="font-semibold text-[#087F6A]">Metered Outturn</span>
+              <span className="text-[11px] text-[#8B9692]">(Actual)</span>
+            </div>
+          </div>
+
+          {/* Interactive Timeline Scrubber Control */}
+          <div className="bg-[#EEF2F1] rounded-lg p-4 border border-[#DCE3E0] space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs gap-2">
+              <div className="flex items-center space-x-2 text-[#18201F] font-semibold">
+                <Sliders className="w-3.5 h-3.5 text-[#C96A3D]" />
+                <span>Publication Run: Cycle {currentRunIndex + 1} of {evolution.evolutionSeries.length}</span>
               </div>
-              <div className="text-[11px] text-[#66717C] font-mono">
-                Published: <strong className="text-[#17202A]">{activeRun?.publishTime.substring(0, 10)} {activeRun?.publishTime.substring(11, 16)} UTC</strong> ({activeRun?.horizonHours}h ahead of delivery)
+              <div className="text-[11px] text-[#687370]">
+                Published: <strong className="text-[#18201F]">{activeRun?.publishTime.substring(0, 10)} {activeRun?.publishTime.substring(11, 16)} UTC</strong> ({activeRun?.horizonHours}h ahead of delivery)
               </div>
             </div>
 
-            {/* Range Scrubber */}
+            {/* Slider */}
             <input
               type="range"
               min={0}
               max={evolution.evolutionSeries.length - 1}
               value={currentRunIndex}
               onChange={(e) => setActiveCycleIndex(Number(e.target.value))}
-              className="w-full accent-[#E27D4F] h-2 bg-[#EEF1F4] rounded-lg cursor-pointer"
+              className="w-full accent-[#C96A3D] h-2 bg-white rounded-lg cursor-pointer"
             />
-
-            <div className="flex justify-between text-[10px] font-mono text-[#8D98A3]">
-              <span>Earliest Forecast (Long-Range)</span>
-              <span>Gate Closure Commitment</span>
-            </div>
           </div>
 
-          {/* Dynamic Scrubber Metrics Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-[#F4F6F8] rounded-xl p-4 font-mono text-xs border border-[#E4E8EC]">
+          {/* Dynamic Scrubber Metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-2 border-b border-[#DCE3E0]">
             <div>
-              <span className="text-[#8D98A3] block text-[10px] uppercase">Final Metered Outturn</span>
-              <span className="text-xl font-bold text-[#168F79] tabular-nums">
+              <span className="text-[11px] font-medium uppercase text-[#8B9692] block">Final Metered Outturn</span>
+              <span className="text-2xl font-mono font-bold text-[#087F6A] tabular-nums mt-1 block">
                 {evolution.actualGenerationMW !== null && evolution.actualGenerationMW !== undefined
                   ? `${evolution.actualGenerationMW.toLocaleString()} MW`
-                  : 'N/A'}
+                  : '—'}
               </span>
             </div>
             <div>
-              <span className="text-[#8D98A3] block text-[10px] uppercase">Predicted in Active Run</span>
+              <span className="text-[11px] font-medium uppercase text-[#8B9692] block">Predicted in Active Run</span>
               <motion.span
                 key={activeRun?.forecastMW}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-xl font-bold text-[#E27D4F] tabular-nums"
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="text-2xl font-mono font-bold text-[#C96A3D] tabular-nums mt-1 block"
               >
                 {activeRun?.forecastMW.toLocaleString()} MW
               </motion.span>
             </div>
             <div>
-              <span className="text-[#8D98A3] block text-[10px] uppercase">Revision from Prior Run</span>
+              <span className="text-[11px] font-medium uppercase text-[#8B9692] block">Revision from Prior Run</span>
               <span
-                className={`text-xl font-bold tabular-nums ${
+                className={`text-2xl font-mono font-bold tabular-nums mt-1 block ${
                   (activeRun?.deltaFromPreviousMW ?? 0) > 0
-                    ? 'text-[#3D9B76]'
+                    ? 'text-[#087F6A]'
                     : (activeRun?.deltaFromPreviousMW ?? 0) < 0
-                    ? 'text-[#D95C55]'
-                    : 'text-[#66717C]'
+                    ? 'text-[#C96A3D]'
+                    : 'text-[#687370]'
                 }`}
               >
                 {(activeRun?.deltaFromPreviousMW ?? 0) > 0 ? '+' : ''}
@@ -244,74 +262,74 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
               </span>
             </div>
             <div>
-              <span className="text-[#8D98A3] block text-[10px] uppercase">Gap to Final Outturn</span>
-              <span className="text-xl font-bold text-[#17202A] tabular-nums">
+              <span className="text-[11px] font-medium uppercase text-[#8B9692] block">Gap to Final Outturn</span>
+              <span className="text-2xl font-mono font-bold text-[#18201F] tabular-nums mt-1 block">
                 {activeRun?.deltaFromActualMW !== null && activeRun?.deltaFromActualMW !== undefined
                   ? `${activeRun.deltaFromActualMW > 0 ? '+' : ''}${activeRun.deltaFromActualMW.toLocaleString()} MW`
-                  : 'N/A'}
+                  : '—'}
               </span>
             </div>
           </div>
 
           {/* ECharts Step Trajectory Chart */}
-          <div className="h-[340px] w-full">
+          <div className="h-[320px] w-full">
             <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />
           </div>
 
-          {/* Terminal Audit Table */}
-          <div className="border border-[#E4E8EC] rounded-xl overflow-hidden shadow-glass-sm">
-            <div className="bg-[#F4F6F8] px-4 py-2.5 border-b border-[#E4E8EC] flex items-center justify-between text-[11px] font-mono">
-              <span className="font-semibold text-[#17202A] flex items-center gap-1.5">
-                <History className="w-3.5 h-3.5 text-[#E27D4F]" />
-                Full Publication Revision History
+          {/* Publication Audit Table */}
+          <div className="border border-[#DCE3E0] rounded-lg overflow-hidden">
+            <div className="bg-[#EEF2F1] px-4 py-2 border-b border-[#DCE3E0] flex items-center justify-between text-xs">
+              <span className="font-semibold text-[#18201F] flex items-center gap-1.5">
+                <History className="w-3.5 h-3.5 text-[#C96A3D]" />
+                Complete Publication Revision Audit
               </span>
-              <span className="text-[#8D98A3]">{evolution.revisionCount} model cycles</span>
+              <span className="text-[#8B9692]">{evolution.revisionCount} cycles</span>
             </div>
-            <div className="max-h-52 overflow-y-auto font-mono text-xs">
+            <div className="max-h-48 overflow-y-auto font-mono text-xs">
               <table className="w-full text-left">
-                <thead className="bg-white text-[#8D98A3] sticky top-0 border-b border-[#E4E8EC]">
+                <thead className="bg-white text-[#8B9692] sticky top-0 border-b border-[#DCE3E0]">
                   <tr>
-                    <th className="py-2.5 px-3.5 text-[10px] uppercase">Publish Time (UTC)</th>
-                    <th className="py-2.5 px-3.5 text-[10px] uppercase">Lead Time</th>
-                    <th className="py-2.5 px-3.5 text-[10px] uppercase text-right">Predicted MW</th>
-                    <th className="py-2.5 px-3.5 text-[10px] uppercase text-right">Revision Δ</th>
-                    <th className="py-2.5 px-3.5 text-[10px] uppercase text-right">Gap to Actual</th>
+                    <th className="py-2 px-3 text-[10px] uppercase">Publish Time (UTC)</th>
+                    <th className="py-2 px-3 text-[10px] uppercase">Lead Time</th>
+                    <th className="py-2 px-3 text-[10px] uppercase text-right">Predicted MW</th>
+                    <th className="py-2 px-3 text-[10px] uppercase text-right">Revision Δ</th>
+                    <th className="py-2 px-3 text-[10px] uppercase text-right">Gap to Actual</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E4E8EC] text-[#66717C]">
+                <tbody className="divide-y divide-[#E8EDEA] text-[#687370]">
                   {evolution.evolutionSeries.map((rev, idx) => (
                     <tr
                       key={idx}
                       onClick={() => setActiveCycleIndex(idx)}
                       className={`cursor-pointer transition-colors ${
-                        idx === currentRunIndex ? 'bg-[#E27D4F]/10 font-medium' : 'hover:bg-[#F4F6F8]'
+                        idx === currentRunIndex ? 'bg-[#C96A3D]/10 font-semibold' : 'hover:bg-[#EEF2F1]'
                       }`}
                     >
-                      <td className="py-2 px-3.5 text-[#17202A]">
+                      <td className="py-2 px-3 text-[#18201F]">
                         {rev.publishTime.substring(0, 10)} {rev.publishTime.substring(11, 16)}
                       </td>
-                      <td className="py-2 px-3.5 text-[#8D98A3]">{rev.horizonHours}h ahead</td>
-                      <td className="py-2 px-3.5 text-right text-[#E27D4F] font-semibold tabular-nums">
+                      <td className="py-2 px-3 text-[#8B9692]">{rev.horizonHours}h ahead</td>
+                      <td className="py-2 px-3 text-right text-[#C96A3D] font-semibold tabular-nums">
                         {rev.forecastMW.toLocaleString()} MW
                       </td>
-                      <td className="py-2 px-3.5 text-right tabular-nums">
+                      <td className="py-2 px-3 text-right tabular-nums">
                         <span
                           className={
                             rev.deltaFromPreviousMW > 0
-                              ? 'text-[#3D9B76]'
+                              ? 'text-[#087F6A]'
                               : rev.deltaFromPreviousMW < 0
-                              ? 'text-[#D95C55]'
-                              : 'text-[#8D98A3]'
+                              ? 'text-[#C84B4B]'
+                              : 'text-[#8B9692]'
                           }
                         >
                           {rev.deltaFromPreviousMW > 0 ? '+' : ''}
                           {rev.deltaFromPreviousMW.toLocaleString()} MW
                         </span>
                       </td>
-                      <td className="py-2 px-3.5 text-right text-[#66717C] tabular-nums">
+                      <td className="py-2 px-3 text-right text-[#687370] tabular-nums">
                         {rev.deltaFromActualMW !== null && rev.deltaFromActualMW !== undefined
                           ? `${rev.deltaFromActualMW > 0 ? '+' : ''}${rev.deltaFromActualMW.toLocaleString()} MW`
-                          : 'N/A'}
+                          : '—'}
                       </td>
                     </tr>
                   ))}
@@ -321,7 +339,7 @@ export const ForecastEvolutionScrubber: React.FC<ScrubberProps> = ({
           </div>
         </>
       ) : (
-        <div className="h-[200px] flex items-center justify-center text-xs font-mono text-[#8D98A3]">
+        <div className="h-[200px] flex items-center justify-center text-xs font-mono text-[#8B9692]">
           No forecast history records found for this timestamp.
         </div>
       )}
