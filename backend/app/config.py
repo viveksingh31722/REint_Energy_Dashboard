@@ -13,7 +13,10 @@ class Settings(BaseModel):
     port: int = int(os.getenv("PORT", "8000"))
     cors_origins: list[str] = [
         origin.strip() 
-        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+        for origin in os.getenv(
+            "CORS_ORIGINS", 
+            "http://localhost:3000,http://localhost:5173,https://frontend-theta-pied-26.vercel.app"
+        ).split(",")
         if origin.strip()
     ]
     data_dir: Path = DATA_DIR

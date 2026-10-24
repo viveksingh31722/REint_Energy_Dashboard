@@ -9,11 +9,14 @@ import {
   TablePaginatedResponse,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Read backend URL from environment variables, defaulting to live Render deployment
+const RENDER_BACKEND_URL = 'https://reint-energy-backend-5ko2.onrender.com';
+const RAW_URL = import.meta.env.VITE_API_URL || RENDER_BACKEND_URL;
+export const API_BASE_URL = RAW_URL.replace(/\/+$/, '');
 
 const client = axios.create({
-  baseURL: API_BASE_URL ? `${API_BASE_URL}/api` : '/api',
-  timeout: 15000,
+  baseURL: `${API_BASE_URL}/api`,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
