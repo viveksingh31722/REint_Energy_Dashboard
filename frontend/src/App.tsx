@@ -15,7 +15,7 @@ import { AlertCircle } from 'lucide-react';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 10, // 10 minutes cache
+      staleTime: 1000 * 60 * 10,
       refetchOnWindowFocus: false,
     },
   },
@@ -27,7 +27,7 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<'SERIES' | 'ACCURACY' | 'EVOLUTION' | 'TABLE'>('SERIES');
   const [selectedPeriod, setSelectedPeriod] = useState<string>('2026-01-15T18:00:00Z');
 
-  // Backend queries
+  // Backend analytical queries
   const {
     data: summary,
     error: summaryError,
@@ -67,11 +67,11 @@ function DashboardContent() {
   const latestPoint = series && series.length > 0 ? series[series.length - 1] : undefined;
 
   return (
-    <div className="min-h-screen bg-[#080B10] text-slate-100 flex flex-col font-sans relative selection:bg-[#00E5FF]/20 selection:text-white">
-      {/* Subtle Atmospheric Energy Field */}
+    <div className="min-h-screen bg-[#F4F6F8] ambient-light-glass text-[#17202A] flex flex-col font-sans relative selection:bg-[#E27D4F]/20 selection:text-[#17202A]">
+      {/* Light Atmospheric Glass Caustic Field */}
       <AtmosphericField />
 
-      {/* Thin Command Terminal Header */}
+      {/* Refined Glass Product Header */}
       <CommandHeader
         cutoffHour={cutoffHour}
         setCutoffHour={setCutoffHour}
@@ -82,50 +82,50 @@ function DashboardContent() {
       />
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 relative z-10">
-        {/* Error Notice if API is unreachable */}
+        {/* Connection Notice */}
         {summaryError && (
-          <div className="bg-rose-950/70 border border-rose-500/40 rounded p-3 flex items-center space-x-2.5 text-rose-200 text-xs font-mono">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-            <span>Connection Warning: Could not reach backend analytical service. Ensure FastAPI daemon is running on port 8000.</span>
+          <div className="bg-[#FFF5F5] border border-[#D95C55]/30 rounded-xl p-4 flex items-center space-x-2.5 text-[#D95C55] text-xs font-mono shadow-glass-sm">
+            <AlertCircle className="w-4 h-4 shrink-0 text-[#D95C55]" />
+            <span>Connection Notice: Could not reach FastAPI backend. Verify backend is running on port 8000.</span>
           </div>
         )}
 
-        {/* Primary Decision Cockpit (Pillars 1, 2, 3) */}
+        {/* 1. Day-Ahead Wind Position & Floating Glass KPIs */}
         {summary ? (
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.35, type: 'spring', stiffness: 300, damping: 30 }}
           >
             <DecisionCockpit summary={summary} latestPoint={latestPoint} />
           </motion.div>
         ) : (
-          <div className="h-44 border border-white/[0.06] bg-[#0E131F]/50 rounded-lg animate-pulse flex items-center justify-center text-xs font-mono text-slate-500">
-            Initialising decision signal & risk benchmarks...
+          <div className="h-44 solid-data-surface rounded-2xl animate-pulse flex items-center justify-center text-xs font-mono text-[#8D98A3]">
+            Initialising day-ahead position & risk benchmarks...
           </div>
         )}
 
-        {/* Tab Viewport with Smooth Motion Transitions */}
+        {/* 2. Visual Narrative Viewport */}
         <AnimatePresence mode="wait">
           {activeTab === 'SERIES' && (
             <motion.div
               key="SERIES"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* ECharts Central Hero Surface */}
+              {/* ECharts Main Forecast vs Actual Chart */}
               {isSeriesLoading ? (
-                <div className="h-[440px] border border-white/[0.06] bg-[#0E131F]/50 rounded-lg animate-pulse flex items-center justify-center text-xs font-mono text-slate-500">
-                  Rendering 30-minute time-series surface...
+                <div className="h-[450px] solid-data-surface rounded-2xl animate-pulse flex items-center justify-center text-xs font-mono text-[#8D98A3]">
+                  Rendering 30-minute settlement surface...
                 </div>
               ) : series ? (
                 <ForecastHeroChart series={series} onSelectPeriod={handleSelectPeriod} />
               ) : null}
 
-              {/* Editorial Market Intelligence Briefing */}
+              {/* Market Intelligence Briefing */}
               {summary && <MarketIntelligence summary={summary} />}
             </motion.div>
           )}
@@ -133,10 +133,10 @@ function DashboardContent() {
           {activeTab === 'ACCURACY' && (
             <motion.div
               key="ACCURACY"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
             >
               {summary && (
                 <AccuracyWorkspace
@@ -153,10 +153,10 @@ function DashboardContent() {
           {activeTab === 'EVOLUTION' && (
             <motion.div
               key="EVOLUTION"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
             >
               <ForecastEvolutionScrubber initialDeliveryTime={selectedPeriod} />
             </motion.div>
@@ -165,10 +165,10 @@ function DashboardContent() {
           {activeTab === 'TABLE' && (
             <motion.div
               key="TABLE"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
             >
               <SettlementTerminalGrid
                 cutoffHour={cutoffHour}
@@ -180,20 +180,20 @@ function DashboardContent() {
         </AnimatePresence>
       </main>
 
-      {/* Razor-Thin Terminal Footer */}
-      <footer className="border-t border-white/[0.06] bg-[#06080D]/95 py-3 mt-auto relative z-10">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-slate-400 gap-2">
+      {/* Terminal Footnote */}
+      <footer className="border-t border-[#E4E8EC] bg-white/60 backdrop-blur-md py-4 mt-auto relative z-10">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-[#8D98A3] gap-2">
           <div className="flex items-center space-x-2">
-            <span className="text-white font-medium">BMRS DATA FEEDS:</span>
+            <span className="text-[#66717C] font-semibold">BMRS DATA FEEDS:</span>
             <span>FUELHH OUTTURN (WIND)</span>
-            <span className="text-white/20">·</span>
+            <span className="text-[#CBD2D9]">·</span>
             <span>WINDFOR FORECAST RUNS</span>
           </div>
           <div>
             <span>GB ELECTRICITY MARKET TIME: GMT (UTC+0) · SETTLEMENT PERIODS 1–48</span>
           </div>
           <div>
-            <span className="text-slate-400">REint Forecasting IQ · v2.0 Enterprise</span>
+            <span className="text-[#66717C] font-medium">REint Forecasting IQ · Energy Terminal</span>
           </div>
         </div>
       </footer>

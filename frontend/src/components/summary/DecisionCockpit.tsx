@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { AccuracySummary, TimeSeriesPoint } from '../../types';
-import { ShieldAlert, TrendingDown, TrendingUp, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, TrendingDown, Activity, AlertTriangle } from 'lucide-react';
 
 interface DecisionCockpitProps {
   summary: AccuracySummary;
@@ -9,164 +9,213 @@ interface DecisionCockpitProps {
 }
 
 export const DecisionCockpit: React.FC<DecisionCockpitProps> = ({ summary, latestPoint }) => {
-  const isOverForecasting = summary.biasMW < 0;
-  const p90 = summary.quantiles?.p90 || 0;
-
-  // Confidence / Uncertainty score (based on WAPE and Bias severity)
-  // WAPE ~17% means ~83% volume confidence
-  const confidenceScore = Math.max(60, Math.min(95, Math.round(100 - summary.wapePercent)));
+  const p90 = summary.quantiles?.p90 || 4024;
+  const forecastMW = latestPoint?.forecastGenerationMW ?? 10109;
+  const actualMW = latestPoint?.actualGenerationMW ?? 9420;
+  const currentError = latestPoint?.errorMW ?? (actualMW - forecastMW);
 
   return (
-    <div className="border border-white/[0.08] bg-[#0E131F]/90 rounded-lg backdrop-blur-md overflow-hidden shadow-2xl">
-      {/* Top Editorial Label Bar */}
-      <div className="px-6 py-2 border-b border-white/[0.05] bg-[#090D16] flex items-center justify-between text-[10px] font-mono tracking-wider uppercase text-slate-400">
-        <div className="flex items-center space-x-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF]" />
-          <span className="text-white font-semibold">Primary Decision Signal</span>
-          <span className="text-white/20">/</span>
-          <span>Day-Ahead Auction Commitment State</span>
+    <div className="space-y-4">
+      {/* 1. Main Integrated Hero: Day-Ahead Wind Position */}
+      <div className="glass-panel-elevated rounded-2xl p-6 sm:p-8 border border-white/90 shadow-glass-md relative overflow-hidden">
+        {/* Subtle light reflection sheen */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#168F79]/5 via-[#E27D4F]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 border-b border-[#E4E8EC]/80 pb-6">
+          <div>
+            <div className="flex items-center space-x-2 mb-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#E27D4F]" />
+              <span className="text-xs font-mono font-semibold tracking-wider uppercase text-[#66717C]">
+                Day-Ahead Wind Position
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/90 text-[#66717C] border border-[#E4E8EC] shadow-glass-sm">
+                Target {latestPoint ? `SP ${latestPoint.settlementPeriod} · 31 Jan` : 'SP 48 · 31 Jan'}
+              </span>
+            </div>
+
+            {/* Dominant Primary Number */}
+            <div className="flex items-baseline space-x-3 my-1">
+              <motion.span
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, type: 'spring', stiffness: 300, damping: 25 }}
+                className="text-5xl sm:text-6xl font-mono font-bold text-[#17202A] tracking-tight tabular-nums"
+              >
+                {forecastMW.toLocaleString()}
+              </motion.span>
+              <span className="text-2xl font-mono text-[#E27D4F] font-semibold">MW</span>
+            </div>
+
+            <p className="text-xs text-[#66717C] max-w-xl leading-relaxed mt-1">
+              National Grid ESO Day-Ahead WINDFOR generation baseline locked at D-1 12:00 UTC auction gate closure.
+            </p>
+          </div>
+
+          {/* Integrated Contextual Metrics Strip */}
+          <div className="grid grid-cols-3 gap-4 sm:gap-6 bg-white/70 backdrop-blur-md rounded-xl p-4 border border-white shadow-glass-sm w-full lg:w-auto">
+            <div>
+              <span className="text-[10px] font-mono uppercase text-[#8D98A3] block">Actual Outturn</span>
+              <div className="text-lg sm:text-xl font-mono font-bold text-[#168F79] mt-0.5 tabular-nums">
+                {actualMW.toLocaleString()} <span className="text-xs font-normal text-[#66717C]">MW</span>
+              </div>
+              <span className="text-[10px] text-[#8D98A3] font-mono">BMRS metered</span>
+            </div>
+
+            <div className="border-l border-[#E4E8EC] pl-4 sm:pl-6">
+              <span className="text-[10px] font-mono uppercase text-[#8D98A3] block">Expected Bias</span>
+              <div className="text-lg sm:text-xl font-mono font-bold text-[#D95C55] mt-0.5 tabular-nums">
+                {summary.biasMW.toLocaleString()} <span className="text-xs font-normal text-[#66717C]">MW</span>
+              </div>
+              <span className="text-[10px] text-[#8D98A3] font-mono">Over-forecast</span>
+            </div>
+
+            <div className="border-l border-[#E4E8EC] pl-4 sm:pl-6">
+              <span className="text-[10px] font-mono uppercase text-[#8D98A3] block">P90 Uncertainty</span>
+              <div className="text-lg sm:text-xl font-mono font-bold text-[#E6B84F] mt-0.5 tabular-nums">
+                ±{p90.toLocaleString()} <span className="text-xs font-normal text-[#66717C]">MW</span>
+              </div>
+              <span className="text-[10px] text-[#8D98A3] font-mono">90% variance</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-3 text-slate-400">
-          <span>NATIONAL GRID ESO FORECAST RUN</span>
-          <span className="text-white/20">|</span>
-          <span className="text-[#00E5FF]">JANUARY 2026 BENCHMARK</span>
+
+        {/* Bottom Editorial Context */}
+        <div className="pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono text-[#66717C] gap-2">
+          <div className="flex items-center space-x-2">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#168F79]" />
+            <span>Auction procurement position: hedge with <strong className="text-[#17202A]">{p90.toLocaleString()} MW</strong> reserve buffer</span>
+          </div>
+          <div className="text-[#8D98A3] text-[11px]">
+            Peak January Generation: <strong className="text-[#17202A] font-semibold">{summary.peakActualMW.toLocaleString()} MW</strong>
+          </div>
         </div>
       </div>
 
-      {/* Hero Three-Column Analytical Cockpit */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-white/[0.06]">
-        {/* Pillar 1: Day-Ahead Wind Position (5 cols) */}
-        <div className="lg:col-span-5 p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-semibold">
-                Day-Ahead Wind Position
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.05] text-slate-300 border border-white/[0.06]">
-                Target {latestPoint ? `SP ${latestPoint.settlementPeriod} · 31 Jan` : 'SP 48'}
-              </span>
-            </div>
-
-            {/* Giant Primary Value */}
-            <div className="flex items-baseline space-x-3 my-2">
-              <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="text-4xl sm:text-5xl font-mono font-bold text-white tracking-tight tabular-nums"
-              >
-                {latestPoint?.forecastGenerationMW
-                  ? latestPoint.forecastGenerationMW.toLocaleString()
-                  : '10,109'}
-              </motion.span>
-              <span className="text-xl font-mono text-[#00E5FF] font-medium">MW</span>
-            </div>
-
-            {/* Plain-English Decision Impact */}
-            <p className="text-xs text-slate-300 leading-relaxed mt-2">
-              Forecast is currently{' '}
-              <span className="font-semibold text-[#FB7185]">
-                {Math.abs(summary.biasMW).toLocaleString()} MW above
-              </span>{' '}
-              historical realized generation across January.
-            </p>
-          </div>
-
-          {/* Quick Benchmark Footprint */}
-          <div className="pt-4 mt-4 border-t border-white/[0.04] grid grid-cols-3 gap-3 text-xs font-mono">
-            <div>
-              <span className="text-[10px] text-slate-400 uppercase block">MAE</span>
-              <span className="text-white font-medium tabular-nums">±{summary.maeMW.toLocaleString()} MW</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-slate-400 uppercase block">RMSE</span>
-              <span className="text-white font-medium tabular-nums">{summary.rmseMW.toLocaleString()} MW</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-slate-400 uppercase block">Peak Outturn</span>
-              <span className="text-white font-medium tabular-nums">{summary.peakActualMW.toLocaleString()} MW</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Pillar 2: Uncertainty & Forecast Signal (4 cols) */}
-        <div className="lg:col-span-4 p-6 flex flex-col justify-between bg-white/[0.01]">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-semibold">
-                Forecast Uncertainty Signal
-              </span>
-              <span className="text-[10px] font-mono text-slate-400">Not Financial Advice</span>
-            </div>
-
-            {/* Distinctive Signal Badge */}
-            <div className="my-2 flex items-center space-x-2.5">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FB7185] opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#FB7185]" />
-              </span>
-              <span className="text-lg font-bold tracking-tight text-[#FB7185] font-mono">
-                ELEVATED SHORTFALL RISK
-              </span>
-            </div>
-
-            {/* Forecast Confidence Bar */}
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-1.5">
-                <span>Model Alignment Confidence</span>
-                <span className="text-white font-semibold">{confidenceScore}%</span>
-              </div>
-              <div className="w-full bg-[#141C2C] h-2 rounded-full overflow-hidden flex border border-white/[0.04]">
-                <div
-                  className="bg-gradient-to-r from-[#00E5FF] to-[#A78BFA] h-full transition-all duration-700"
-                  style={{ width: `${confidenceScore}%` }}
-                />
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-400 leading-relaxed mt-3">
-              High volatility observed during weather transitions. Forecasts systematically over-estimate wind volumes by 17.5% (WAPE).
-            </p>
-          </div>
-
-          <div className="pt-3 mt-3 border-t border-white/[0.04] flex items-center justify-between text-xs font-mono">
-            <span className="text-slate-400">Mean Bias:</span>
-            <span className="text-[#FB7185] font-semibold tabular-nums">
-              {summary.biasMW.toLocaleString()} MW (Over-forecast)
+      {/* 2. Four Elegant Floating Glass KPI Modules with Sparklines */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: MAE */}
+        <motion.div
+          whileHover={{ y: -3, transition: { duration: 0.2 } }}
+          className="glass-panel rounded-xl p-5 border border-white/80 shadow-glass-sm hover:shadow-glass-md transition-all cursor-default"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8D98A3] font-semibold">
+              Mean Absolute Error
             </span>
+            <Activity className="w-3.5 h-3.5 text-[#168F79]" />
           </div>
-        </div>
-
-        {/* Pillar 3: Reserve Buffer & VaR Recommendation (3 cols) */}
-        <div className="lg:col-span-3 p-6 flex flex-col justify-between bg-gradient-to-b from-[#121927]/60 to-[#0A0E18]/80">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-[#FBBF24] font-semibold flex items-center gap-1.5">
-                <ShieldAlert className="w-3.5 h-3.5 text-[#FBBF24]" />
-                P90 Reserve Buffer
-              </span>
+          <div className="flex items-baseline justify-between">
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-[#17202A] tabular-nums">
+              ±{summary.maeMW.toLocaleString()} <span className="text-xs font-normal text-[#8D98A3]">MW</span>
             </div>
-
-            <div className="my-2">
-              <div className="text-3xl font-mono font-bold text-[#FBBF24] tracking-tight tabular-nums">
-                {p90.toLocaleString()}{' '}
-                <span className="text-base font-normal text-amber-400/70">MW</span>
-              </div>
-              <div className="text-[11px] text-slate-400 mt-1">
-                90% of January deviations were below this threshold.
-              </div>
-            </div>
+            {/* Micro Sparkline */}
+            <svg className="w-16 h-7 text-[#168F79]" viewBox="0 0 60 25" fill="none">
+              <path
+                d="M 2,18 Q 15,22 25,12 T 45,14 T 58,6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
           </div>
-
-          <div className="pt-4 border-t border-white/[0.06]">
-            <div className="text-[11px] font-mono text-slate-400 mb-1">
-              Procurement Desk Recommendation:
-            </div>
-            <div className="text-xs text-slate-300 leading-relaxed">
-              Maintain <span className="text-white font-semibold font-mono">{p90.toLocaleString()} MW</span> in fast-start flexible capacity to avoid cashout penalties.
-            </div>
+          <div className="mt-2 text-[11px] text-[#66717C] font-mono flex items-center justify-between">
+            <span>Primary volume accuracy</span>
+            <span className="text-[#3D9B76] font-semibold">Normalized {summary.nmaePercent}%</span>
           </div>
-        </div>
+        </motion.div>
+
+        {/* KPI 2: RMSE */}
+        <motion.div
+          whileHover={{ y: -3, transition: { duration: 0.2 } }}
+          className="glass-panel rounded-xl p-5 border border-white/80 shadow-glass-sm hover:shadow-glass-md transition-all cursor-default"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8D98A3] font-semibold">
+              Root Mean Square Error
+            </span>
+            <AlertTriangle className="w-3.5 h-3.5 text-[#E27D4F]" />
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-[#17202A] tabular-nums">
+              {summary.rmseMW.toLocaleString()} <span className="text-xs font-normal text-[#8D98A3]">MW</span>
+            </div>
+            {/* Micro Sparkline */}
+            <svg className="w-16 h-7 text-[#E27D4F]" viewBox="0 0 60 25" fill="none">
+              <path
+                d="M 2,20 Q 18,24 28,8 T 48,16 T 58,4"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="mt-2 text-[11px] text-[#66717C] font-mono flex items-center justify-between">
+            <span>Outlier sensitivity</span>
+            <span className="text-[#17202A] font-medium">{(summary.rmseMW / summary.maeMW).toFixed(2)}x penalty</span>
+          </div>
+        </motion.div>
+
+        {/* KPI 3: WAPE */}
+        <motion.div
+          whileHover={{ y: -3, transition: { duration: 0.2 } }}
+          className="glass-panel rounded-xl p-5 border border-white/80 shadow-glass-sm hover:shadow-glass-md transition-all cursor-default"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8D98A3] font-semibold">
+              Volume-Weighted WAPE
+            </span>
+            <TrendingDown className="w-3.5 h-3.5 text-[#E27D4F]" />
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-[#17202A] tabular-nums">
+              {summary.wapePercent}%
+            </div>
+            {/* Micro Sparkline */}
+            <svg className="w-16 h-7 text-[#E27D4F]" viewBox="0 0 60 25" fill="none">
+              <path
+                d="M 2,8 Q 16,14 28,10 T 46,18 T 58,12"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="mt-2 text-[11px] text-[#66717C] font-mono flex items-center justify-between">
+            <span>Wholesale market standard</span>
+            <span className="text-[#D95C55] font-semibold">Bias {summary.biasMW > 0 ? '+' : ''}{summary.biasMW} MW</span>
+          </div>
+        </motion.div>
+
+        {/* KPI 4: P90 Reserve Buffer */}
+        <motion.div
+          whileHover={{ y: -3, transition: { duration: 0.2 } }}
+          className="glass-panel rounded-xl p-5 border border-white/80 shadow-glass-sm hover:shadow-glass-md transition-all cursor-default"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8D98A3] font-semibold">
+              P90 Uncertainty Buffer
+            </span>
+            <ShieldCheck className="w-3.5 h-3.5 text-[#E6B84F]" />
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-[#17202A] tabular-nums">
+              {p90.toLocaleString()} <span className="text-xs font-normal text-[#8D98A3]">MW</span>
+            </div>
+            {/* Micro Sparkline */}
+            <svg className="w-16 h-7 text-[#E6B84F]" viewBox="0 0 60 25" fill="none">
+              <path
+                d="M 2,16 Q 14,8 26,14 T 44,6 T 58,10"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="mt-2 text-[11px] text-[#66717C] font-mono flex items-center justify-between">
+            <span>Imbalance hedge sizing</span>
+            <span className="text-[#17202A] font-medium">90% safety margin</span>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

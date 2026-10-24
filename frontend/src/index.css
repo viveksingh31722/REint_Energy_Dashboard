@@ -1,36 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-deep: #080B10;
-  --bg-surface: #0E131F;
-  --bg-surface-elevated: #141A29;
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-hover: rgba(255, 255, 255, 0.15);
-  --accent-cyan: #00E5FF;
-  --accent-violet: #A78BFA;
-  --accent-emerald: #34D399;
-  --accent-rose: #FB7185;
-  --accent-amber: #FBBF24;
+  --bg-canvas: #F4F6F8;
+  --bg-secondary: #EEF1F4;
+  --surface-solid: #FFFFFF;
+  --surface-glass: rgba(255, 255, 255, 0.68);
+  --surface-glass-elevated: rgba(255, 255, 255, 0.84);
+  --border-glass: rgba(255, 255, 255, 0.85);
+  --border-subtle: #E4E8EC;
+  
+  --text-primary: #17202A;
+  --text-secondary: #66717C;
+  --text-muted: #8D98A3;
+
+  /* Data domain tokens */
+  --actual-emerald: #168F79;
+  --forecast-coral: #E27D4F;
+  --uncertainty-yellow: #E6B84F;
+  --error-softred: #D95C55;
+  --positive-green: #3D9B76;
 }
 
 @layer base {
   body {
-    background-color: #080B10;
-    color: #E2E8F0;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
     font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
-    selection-background-color: rgba(0, 229, 255, 0.25);
-    selection-color: #FFFFFF;
+    selection-background-color: rgba(226, 125, 79, 0.22);
+    selection-color: #17202A;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Universal tabular numerals for financial data */
   .font-mono,
   .tabular-nums {
     font-family: 'Geist Mono', 'JetBrains Mono', monospace;
@@ -38,41 +45,57 @@
   }
 }
 
-/* Background atmospheric noise and subtle grid lines */
-.bg-grid-subtle {
-  background-size: 40px 40px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+/* Light passing through glass ambient background */
+.ambient-light-glass {
+  background:
+    radial-gradient(1200px circle at 15% 5%, rgba(22, 143, 121, 0.05), transparent 60%),
+    radial-gradient(1000px circle at 85% 15%, rgba(226, 125, 79, 0.045), transparent 55%),
+    radial-gradient(900px circle at 50% 60%, rgba(230, 184, 79, 0.035), transparent 60%);
 }
 
-.radial-atmospheric-glow {
-  background: 
-    radial-gradient(1100px circle at 50% -15%, rgba(0, 229, 255, 0.06), transparent 50%),
-    radial-gradient(800px circle at 85% 15%, rgba(167, 139, 250, 0.04), transparent 45%),
-    radial-gradient(900px circle at 15% 45%, rgba(0, 229, 255, 0.03), transparent 40%);
+/* Reusable Glassmorphic Panels */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 32px 0 rgba(23, 32, 42, 0.05);
 }
 
-/* Custom terminal scrollbars */
+.glass-panel-elevated {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 16px 40px 0 rgba(23, 32, 42, 0.08);
+}
+
+.solid-data-surface {
+  background: #FFFFFF;
+  border: 1px solid #E4E8EC;
+  box-shadow: 0 4px 20px 0 rgba(23, 32, 42, 0.04);
+}
+
+/* Refined light scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #080B10;
+  background: #EEF1F4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1C2436;
+  background: #CBD2D9;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2E3B57;
+  background: #9AA5B1;
 }
 
-/* Respect user's motion preference */
+/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
