@@ -1,66 +1,58 @@
 /**
  * Centralized Design Tokens for REint Energy | Forecasting IQ
  * 
- * Aesthetic: PREMIUM ENERGY INTELLIGENCE TERMINAL
+ * Aesthetic: PREMIUM DARK ENERGY TRADING / FINANCIAL TERMINAL
  * Visual Foundation:
- * - Canvas Background: #EEF2F1 (Warm off-white / sage-tinted neutral)
- * - Primary Surface: #FFFFFF
- * - Glass Surface: rgba(255, 255, 255, 0.72)
- * - Strong Glass: rgba(255, 255, 255, 0.88)
- * - Divider: #DCE3E0
- * - Typography: Primary #18201F, Secondary #687370, Muted #8B9692
+ * - BACKGROUND: #0B0D0D
+ * - SIDEBAR: #080A0A
+ * - CARD: #111514
+ * - ELEVATED CARD: #151A18
+ * - BORDER: #252C29
+ * - PRIMARY TEXT: #F1F4F1
+ * - SECONDARY TEXT: #8B9691
+ * - MUTED TEXT: #5F6A65
  * 
  * Data Identity:
- * - ACTUAL WIND (Emerald): #087F6A
- * - DAY-AHEAD FORECAST (Terracotta): #C96A3D
- * - UNCERTAINTY (Ochre): #D5A83E
- * - ERROR (Soft Red): #C84B4B
- * - SUBTLE GREEN: #8BAFA7
+ * - ACTUAL WIND (Emerald): #35B89A
+ * - DAY-AHEAD FORECAST (Terracotta): #E58A5C
+ * - UNCERTAINTY (Ochre): #D7B35A
+ * - ERROR (Soft Red): #E0645A
  */
 
 export const COLOR_TOKENS = {
   canvas: {
-    bg: '#EEF2F1',
-    surface: '#FFFFFF',
-    glass: 'rgba(255, 255, 255, 0.72)',
-    glassStrong: 'rgba(255, 255, 255, 0.88)',
-    divider: '#DCE3E0',
-    dividerLight: '#E8EDEA',
-    border: '#DCE3E0',
+    bg: '#0B0D0D',
+    sidebar: '#080A0A',
+    card: '#111514',
+    cardElevated: '#151A18',
+    border: '#252C29',
+    borderLight: '#1C2220',
+    divider: '#252C29',
   },
 
   text: {
-    primary: '#18201F',
-    secondary: '#687370',
-    muted: '#8B9692',
-    faint: '#B0B9B6',
-    white: '#FFFFFF',
+    primary: '#F1F4F1',
+    secondary: '#8B9691',
+    muted: '#5F6A65',
+    faint: '#3D4441',
   },
 
   data: {
-    // ACTUAL: Deep Emerald
-    actual: '#087F6A',
-    actualArea: 'rgba(8, 127, 106, 0.08)',
-    actualAreaHover: 'rgba(8, 127, 106, 0.14)',
-    actualSubtle: '#8BAFA7',
+    actual: '#35B89A',
+    actualArea: 'rgba(53, 184, 154, 0.12)',
+    actualAreaSubtle: 'rgba(53, 184, 154, 0.04)',
 
-    // FORECAST: Terracotta
-    forecast: '#C96A3D',
-    forecastArea: 'rgba(201, 106, 61, 0.05)',
-    forecastSubtle: 'rgba(201, 106, 61, 0.12)',
+    forecast: '#E58A5C',
+    forecastArea: 'rgba(229, 138, 92, 0.08)',
+    forecastSubtle: 'rgba(229, 138, 92, 0.16)',
 
-    // UNCERTAINTY: Ochre
-    uncertainty: '#D5A83E',
-    uncertaintyBand: 'rgba(213, 168, 62, 0.10)',
-    uncertaintyBorder: 'rgba(213, 168, 62, 0.35)',
+    uncertainty: '#D7B35A',
+    uncertaintyBand: 'rgba(215, 179, 90, 0.10)',
+    uncertaintyBorder: 'rgba(215, 179, 90, 0.35)',
 
-    // ERROR: Soft Red
-    error: '#C84B4B',
-    errorBg: 'rgba(200, 75, 75, 0.08)',
-    errorBorder: 'rgba(200, 75, 75, 0.25)',
-
-    // NEUTRAL / MUTED DATA
-    neutral: '#687370',
+    error: '#E0645A',
+    errorBg: 'rgba(224, 100, 90, 0.12)',
+    errorBorder: 'rgba(224, 100, 90, 0.35)',
   },
 } as const;
 

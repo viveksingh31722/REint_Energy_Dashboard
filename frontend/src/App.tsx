@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
-import { AtmosphericField } from './components/layout/AtmosphericField';
-import { CommandHeader } from './components/layout/CommandHeader';
-import { DecisionCockpit } from './components/summary/DecisionCockpit';
-import { MetricsStrip } from './components/summary/MetricsStrip';
-import { MarketIntelligence } from './components/summary/MarketIntelligence';
+import { Sidebar } from './components/layout/Sidebar';
+import { TopBar } from './components/layout/TopBar';
+import { KpiRow } from './components/summary/KpiRow';
 import { ForecastHeroChart } from './components/charts/ForecastHeroChart';
+import { ForecastIntelligencePanel } from './components/summary/ForecastIntelligencePanel';
+import { ForecastEvolutionTimeline } from './components/evolution/ForecastEvolutionTimeline';
+import { ErrorDistributionCard } from './components/accuracy/ErrorDistributionCard';
+import { SettlementPreviewCard } from './components/table/SettlementPreviewCard';
 import { AccuracyWorkspace } from './components/accuracy/AccuracyWorkspace';
 import { ForecastEvolutionScrubber } from './components/evolution/ForecastEvolutionScrubber';
 import { SettlementTerminalGrid } from './components/table/SettlementTerminalGrid';
@@ -68,141 +70,160 @@ function DashboardContent() {
   const latestPoint = series && series.length > 0 ? series[series.length - 1] : undefined;
 
   return (
-    <div className="min-h-screen bg-[#EEF2F1] ambient-terminal-depth text-[#18201F] flex flex-col font-sans relative selection:bg-[#C96A3D]/20 selection:text-[#18201F]">
-      {/* Calm Ambient Depth Streamlines */}
-      <AtmosphericField />
+    <div className="min-h-screen bg-[#0B0D0D] text-[#F1F4F1] flex font-sans selection:bg-[#E58A5C]/25 selection:text-[#F1F4F1]">
+      {/* 1. LEFT SIDEBAR: 80px Compact Chrome */}
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Thin Elegant Application Chrome Header */}
-      <CommandHeader
-        cutoffHour={cutoffHour}
-        setCutoffHour={setCutoffHour}
-        resolution={resolution}
-        setResolution={setResolution}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
+      {/* 2. MAIN APPLICATION WORKSPACE */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        {/* Top Application Bar */}
+        <TopBar
+          cutoffHour={cutoffHour}
+          setCutoffHour={setCutoffHour}
+          resolution={resolution}
+          setResolution={setResolution}
+        />
 
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 relative z-10">
-        {/* Backend Connectivity Notice */}
-        {summaryError && (
-          <div className="bg-white border border-[#C84B4B]/40 rounded-lg p-3 flex items-center space-x-2 text-[#C84B4B] text-xs font-mono shadow-terminal-sm">
-            <AlertCircle className="w-4 h-4 shrink-0 text-[#C84B4B]" />
-            <span>Connection Notice: Could not reach FastAPI backend. Verify backend is running on port 8000.</span>
-          </div>
-        )}
+        <main className="flex-1 max-w-[1680px] w-full mx-auto p-5 sm:p-6 space-y-5">
+          {/* Backend Connectivity Notice */}
+          {summaryError && (
+            <div className="bg-[#151A18] border border-[#E0645A]/40 rounded-xl p-3 flex items-center space-x-2 text-[#E0645A] text-xs font-mono">
+              <AlertCircle className="w-4 h-4 shrink-0 text-[#E0645A]" />
+              <span>Connection Notice: Could not reach FastAPI backend. Verify backend is running on port 8000.</span>
+            </div>
+          )}
 
-        {/* 1. DAY-AHEAD WIND POSITION: Editorial Information Block (Zero Card Boxes) */}
-        {summary ? (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <DecisionCockpit summary={summary} latestPoint={latestPoint} />
-          </motion.div>
-        ) : (
-          <div className="h-28 border-b border-[#DCE3E0] animate-pulse flex items-center justify-center text-xs font-mono text-[#8B9692]">
-            Initialising day-ahead position & benchmarks...
-          </div>
-        )}
-
-        {/* 2. Visual Analytical Narrative Viewport */}
-        <AnimatePresence mode="wait">
-          {activeTab === 'SERIES' && (
+          {/* PRIMARY KPI ROW: 4 Compact Premium Cards with Mini Sparklines */}
+          {summary ? (
             <motion.div
-              key="SERIES"
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-8"
+              transition={{ duration: 0.25 }}
             >
-              {/* MAIN FORECAST / ACTUAL VISUALIZATION: Hero of the Product */}
-              {isSeriesLoading ? (
-                <div className="h-[500px] terminal-surface rounded-xl animate-pulse flex items-center justify-center text-xs font-mono text-[#8B9692]">
-                  Loading 30-minute settlement trajectory...
+              <KpiRow summary={summary} latestPoint={latestPoint} />
+            </motion.div>
+          ) : (
+            <div className="h-28 dark-card animate-pulse flex items-center justify-center text-xs font-mono text-[#5F6A65]">
+              Initialising day-ahead position and benchmarks...
+            </div>
+          )}
+
+          {/* DYNAMIC VIEWPORT */}
+          <AnimatePresence mode="wait">
+            {activeTab === 'SERIES' && (
+              <motion.div
+                key="SERIES"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18 }}
+                className="space-y-5"
+              >
+                {/* TWO-COLUMN ANALYTICAL WORKSPACE: 70% Left Chart + 30% Right Intelligence */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                  <div className="lg:col-span-8 min-h-[460px]">
+                    {isSeriesLoading ? (
+                      <div className="h-full min-h-[460px] dark-card animate-pulse flex items-center justify-center text-xs font-mono text-[#5F6A65]">
+                        Rendering 30-minute settlement surface...
+                      </div>
+                    ) : series ? (
+                      <ForecastHeroChart series={series} onSelectPeriod={handleSelectPeriod} />
+                    ) : null}
+                  </div>
+
+                  <div className="lg:col-span-4 min-h-[460px]">
+                    {summary ? (
+                      <ForecastIntelligencePanel summary={summary} />
+                    ) : null}
+                  </div>
                 </div>
-              ) : series ? (
-                <ForecastHeroChart series={series} onSelectPeriod={handleSelectPeriod} />
-              ) : null}
 
-              {/* HORIZONTAL ACCURACY METRICS STRIP: Clean Thin Dividers */}
-              {summary && <MetricsStrip summary={summary} />}
+                {/* SECONDARY ANALYTICS ROW: 2 Cards (Evolution Timeline + Error Distribution) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                  <div className="lg:col-span-7">
+                    <ForecastEvolutionTimeline initialDeliveryTime={selectedPeriod} />
+                  </div>
+                  <div className="lg:col-span-5">
+                    <ErrorDistributionCard distribution={distribution} />
+                  </div>
+                </div>
 
-              {/* MARKET INTELLIGENCE: Editorial Research Briefing */}
-              {summary && <MarketIntelligence summary={summary} />}
-            </motion.div>
-          )}
-
-          {activeTab === 'ACCURACY' && (
-            <motion.div
-              key="ACCURACY"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-8"
-            >
-              {summary && <MetricsStrip summary={summary} />}
-              {summary && (
-                <AccuracyWorkspace
-                  summary={summary}
-                  series={series || []}
-                  distribution={distribution}
-                  diurnal={diurnal}
-                  horizon={horizon}
+                {/* BOTTOM: SETTLEMENT PREVIEW COMPACT CARD */}
+                <SettlementPreviewCard
+                  cutoffHour={cutoffHour}
+                  resolution={resolution}
+                  onViewFullTable={() => setActiveTab('TABLE')}
+                  onSelectPeriod={handleSelectPeriod}
                 />
-              )}
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {activeTab === 'EVOLUTION' && (
-            <motion.div
-              key="EVOLUTION"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ForecastEvolutionScrubber initialDeliveryTime={selectedPeriod} />
-            </motion.div>
-          )}
+            {activeTab === 'ACCURACY' && (
+              <motion.div
+                key="ACCURACY"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18 }}
+              >
+                {summary && (
+                  <AccuracyWorkspace
+                    summary={summary}
+                    series={series || []}
+                    distribution={distribution}
+                    diurnal={diurnal}
+                    horizon={horizon}
+                  />
+                )}
+              </motion.div>
+            )}
 
-          {activeTab === 'TABLE' && (
-            <motion.div
-              key="TABLE"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}
-            >
-              <SettlementTerminalGrid
-                cutoffHour={cutoffHour}
-                resolution={resolution}
-                onSelectPeriod={handleSelectPeriod}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
+            {activeTab === 'EVOLUTION' && (
+              <motion.div
+                key="EVOLUTION"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18 }}
+              >
+                <ForecastEvolutionScrubber initialDeliveryTime={selectedPeriod} />
+              </motion.div>
+            )}
 
-      {/* Terminal Minimalist Footnote */}
-      <footer className="border-t border-[#DCE3E0] bg-transparent py-4 mt-auto relative z-10">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#8B9692] gap-2">
+            {activeTab === 'TABLE' && (
+              <motion.div
+                key="TABLE"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18 }}
+              >
+                <SettlementTerminalGrid
+                  cutoffHour={cutoffHour}
+                  resolution={resolution}
+                  onSelectPeriod={handleSelectPeriod}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+
+        {/* Minimal Terminal Footer */}
+        <footer className="border-t border-[#252C29] bg-[#080A0A] py-3 px-6 mt-auto text-xs text-[#5F6A65] flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
-            <span className="text-[#18201F] font-medium">BMRS DATA FEEDS:</span>
+            <span className="text-[#8B9691] font-medium">BMRS DATA FEEDS:</span>
             <span>FUELHH Outturn (Wind)</span>
-            <span className="text-[#DCE3E0]">·</span>
+            <span className="text-[#252C29]">·</span>
             <span>WINDFOR Forecast Runs</span>
           </div>
           <div>
             <span>GB Electricity Market: GMT (UTC+0) · Settlement Periods 1–48</span>
           </div>
           <div>
-            <span className="text-[#687370]">REint Forecasting IQ · Energy Terminal</span>
+            <span className="text-[#8B9691]">REint Forecasting IQ · Energy Trading Terminal</span>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

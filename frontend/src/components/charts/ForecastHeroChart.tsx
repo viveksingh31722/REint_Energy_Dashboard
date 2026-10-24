@@ -47,7 +47,7 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
     [filteredData]
   );
 
-  // Uncertainty Corridor (±1,850 MW standard uncertainty)
+  // Uncertainty Corridor (±1,850 MW around forecast)
   const uncertaintyLower = useMemo(
     () =>
       filteredData.map((d) => {
@@ -68,8 +68,8 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
     [filteredData]
   );
 
-  // Severe Error Callouts: Only for statistically significant misses (|Error| >= 3,200 MW)
-  const severeErrorMarkPoints = useMemo(() => {
+  // Significant Error Markers only (|Error| >= 3,200 MW)
+  const significantErrorMarkPoints = useMemo(() => {
     const points: any[] = [];
     filteredData.forEach((d, idx) => {
       if (d.absoluteErrorMW && d.absoluteErrorMW >= 3200) {
@@ -78,7 +78,7 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
             name: 'Significant Miss',
             coord: [timeLabels[idx], d.actualGenerationMW],
             value: `${Math.round(d.absoluteErrorMW).toLocaleString()} MW`,
-            itemStyle: { color: '#C84B4B' },
+            itemStyle: { color: '#E0645A' },
           });
         }
       }
@@ -86,7 +86,7 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
     return points;
   }, [filteredData, timeLabels]);
 
-  // ECharts Option: Financial Market Terminal Architecture
+  // ECharts Option: Financial Energy Terminal
   const option = useMemo(() => {
     return {
       backgroundColor: 'transparent',
@@ -95,8 +95,8 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
       animationEasing: 'cubicOut',
       grid: {
         top: 24,
-        right: 20,
-        bottom: 50,
+        right: 18,
+        bottom: 48,
         left: 55,
         containLabel: false,
       },
@@ -105,22 +105,20 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         axisPointer: {
           type: 'cross',
           lineStyle: {
-            color: 'rgba(201, 106, 61, 0.45)',
+            color: 'rgba(229, 138, 92, 0.45)',
             width: 1,
             type: 'dashed',
           },
           crossStyle: {
-            color: 'rgba(104, 115, 112, 0.25)',
+            color: 'rgba(139, 150, 145, 0.25)',
           },
         },
-        // Floating glass panel tooltip
-        backgroundColor: 'rgba(255, 255, 255, 0.96)',
-        borderColor: '#DCE3E0',
+        backgroundColor: '#111514',
+        borderColor: '#252C29',
         borderWidth: 1,
-        extraCssText: 'box-shadow: 0 8px 24px rgba(24, 32, 31, 0.08); backdrop-filter: blur(16px); border-radius: 8px;',
         padding: [10, 14],
         textStyle: {
-          color: '#18201F',
+          color: '#F1F4F1',
           fontSize: 12,
           fontFamily: 'Geist Mono, JetBrains Mono, monospace',
         },
@@ -140,32 +138,32 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           const time = record.deliveryTime.substring(11, 16);
 
           return `
-            <div style="font-family: 'Geist Mono', monospace; min-width: 200px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #DCE3E0; padding-bottom: 5px; margin-bottom: 6px;">
-                <span style="font-weight: 600; color: #18201F; font-size: 11px;">${time} · SP ${record.settlementPeriod}</span>
-                <span style="color: #8B9692; font-size: 10px;">${record.settlementDate}</span>
+            <div style="font-family: 'Geist Mono', monospace; min-width: 195px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #252C29; padding-bottom: 5px; margin-bottom: 6px;">
+                <span style="font-weight: 600; color: #F1F4F1; font-size: 11px;">${time} · SP ${record.settlementPeriod}</span>
+                <span style="color: #8B9691; font-size: 10px;">${record.settlementDate}</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                <span style="color: #087F6A; font-weight: 500; font-size: 11px;">ACTUAL</span>
-                <span style="font-weight: 700; color: #18201F;">${actual} MW</span>
+                <span style="color: #35B89A; font-weight: 500; font-size: 11px;">ACTUAL</span>
+                <span style="font-weight: 700; color: #F1F4F1;">${actual} MW</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span style="color: #C96A3D; font-weight: 500; font-size: 11px;">DAY-AHEAD</span>
-                <span style="font-weight: 700; color: #18201F;">${forecast} MW</span>
+                <span style="color: #E58A5C; font-weight: 500; font-size: 11px;">DAY-AHEAD</span>
+                <span style="font-weight: 700; color: #F1F4F1;">${forecast} MW</span>
               </div>
-              <div style="border-top: 1px solid #E8EDEA; padding-top: 5px; display: flex; justify-content: space-between; font-size: 11px;">
-                <span style="color: #687370;">ERROR</span>
-                <span style="font-weight: 700; color: ${isSignificant ? '#C84B4B' : error < 0 ? '#C96A3D' : '#087F6A'};">
+              <div style="border-top: 1px solid #1C2220; padding-top: 5px; display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #8B9691;">ERROR</span>
+                <span style="font-weight: 700; color: ${isSignificant ? '#E0645A' : error < 0 ? '#E58A5C' : '#35B89A'};">
                   ${errorSign}${error.toLocaleString()} MW
                 </span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px;">
-                <span style="color: #8B9692;">ABS ERROR</span>
-                <span style="color: #18201F;">±${absError} MW</span>
+                <span style="color: #5F6A65;">ABS ERROR</span>
+                <span style="color: #F1F4F1;">±${absError} MW</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px;">
-                <span style="color: #8B9692;">HORIZON</span>
-                <span style="color: #687370;">${horizon}</span>
+                <span style="color: #5F6A65;">HORIZON</span>
+                <span style="color: #8B9691;">${horizon}</span>
               </div>
             </div>
           `;
@@ -175,10 +173,10 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         type: 'category',
         data: timeLabels,
         boundaryGap: false,
-        axisLine: { lineStyle: { color: '#DCE3E0' } },
+        axisLine: { lineStyle: { color: '#252C29' } },
         axisTick: { show: false },
         axisLabel: {
-          color: '#8B9692',
+          color: '#5F6A65',
           fontSize: 10,
           fontFamily: 'Geist Mono, monospace',
           interval: Math.floor(timeLabels.length / 8),
@@ -190,12 +188,12 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         axisTick: { show: false },
         splitLine: {
           lineStyle: {
-            color: '#E8EDEA',
+            color: '#1A201E',
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: '#8B9692',
+          color: '#5F6A65',
           fontSize: 10,
           fontFamily: 'Geist Mono, monospace',
           formatter: (value: number) => `${(value / 1000).toFixed(0)}k MW`,
@@ -206,21 +204,21 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           type: 'slider',
           show: true,
           xAxisIndex: 0,
-          bottom: 6,
-          height: 16,
+          bottom: 4,
+          height: 14,
           borderColor: 'transparent',
-          backgroundColor: '#EEF2F1',
-          fillerColor: 'rgba(201, 106, 61, 0.14)',
+          backgroundColor: '#0B0D0D',
+          fillerColor: 'rgba(229, 138, 92, 0.16)',
           handleStyle: {
-            color: '#C96A3D',
-            borderColor: '#FFFFFF',
+            color: '#E58A5C',
+            borderColor: '#252C29',
             borderWidth: 1,
           },
           moveHandleStyle: {
-            color: '#CBD5D2',
+            color: '#252C29',
           },
           textStyle: {
-            color: '#8B9692',
+            color: '#5F6A65',
             fontSize: 9,
             fontFamily: 'Geist Mono, monospace',
           },
@@ -232,7 +230,7 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         },
       ],
       series: [
-        // 1. Uncertainty Confidence Corridor (Ochre @ 10% opacity)
+        // 1. Uncertainty Envelope (Ochre #D7B35A @ 10%)
         {
           name: 'Uncertainty Lower Base',
           type: 'line',
@@ -249,17 +247,17 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           symbol: 'none',
           data: uncertaintyBandHeight,
           lineStyle: {
-            color: 'rgba(213, 168, 62, 0.35)',
+            color: 'rgba(215, 179, 90, 0.35)',
             width: 1,
             type: 'dashed',
           },
           areaStyle: {
-            color: 'rgba(213, 168, 62, 0.09)',
+            color: 'rgba(215, 179, 90, 0.10)',
           },
           silent: true,
         },
 
-        // 2. Actual Wind Generation (Emerald #087F6A)
+        // 2. Actual Wind Generation (Emerald #35B89A)
         {
           name: 'Actual Generation',
           type: 'line',
@@ -268,12 +266,12 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           data: actualValues,
           lineStyle: {
             width: 2.2,
-            color: '#087F6A',
+            color: '#35B89A',
           },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(8, 127, 106, 0.08)' },
-              { offset: 0.8, color: 'rgba(8, 127, 106, 0.01)' },
+              { offset: 0, color: 'rgba(53, 184, 154, 0.12)' },
+              { offset: 0.8, color: 'rgba(53, 184, 154, 0.01)' },
               { offset: 1, color: 'transparent' },
             ]),
           },
@@ -286,11 +284,11 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
             symbol: 'circle',
             symbolSize: 6,
             label: { show: false },
-            data: severeErrorMarkPoints,
+            data: significantErrorMarkPoints,
           },
         },
 
-        // 3. Day-Ahead Forecast (Terracotta #C96A3D)
+        // 3. Day-Ahead Forecast (Terracotta #E58A5C)
         {
           name: 'Day-Ahead Forecast',
           type: 'line',
@@ -299,7 +297,7 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
           data: forecastValues,
           lineStyle: {
             width: 1.8,
-            color: '#C96A3D',
+            color: '#E58A5C',
             type: [5, 4],
           },
           emphasis: {
@@ -310,7 +308,7 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         },
       ],
     };
-  }, [timeLabels, actualValues, forecastValues, uncertaintyLower, uncertaintyBandHeight, severeErrorMarkPoints, filteredData]);
+  }, [timeLabels, actualValues, forecastValues, uncertaintyLower, uncertaintyBandHeight, significantErrorMarkPoints, filteredData]);
 
   const onChartClick = (params: any) => {
     if (params && params.dataIndex !== undefined && onSelectPeriod) {
@@ -331,35 +329,35 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
   ] as const;
 
   return (
-    <div className="terminal-surface rounded-xl p-6 shadow-terminal-sm">
-      {/* Top Header & Range Segmented Selector */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+    <div className="dark-card p-5 h-full flex flex-col justify-between">
+      {/* Chart Top Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
         <div>
-          <h2 className="text-xs font-semibold tracking-wider uppercase text-[#18201F]">
+          <h2 className="text-xs font-semibold tracking-wider uppercase text-[#F1F4F1]">
             Actual vs Day-Ahead Forecast
           </h2>
-          <p className="text-xs text-[#8B9692] mt-0.5">
+          <p className="text-[11px] text-[#5F6A65] mt-0.5">
             30-minute UK wind generation · January 2026
           </p>
         </div>
 
-        {/* Subtle Segmented Selector */}
-        <div className="flex items-center space-x-0.5 bg-[#EEF2F1] rounded-lg p-0.5 border border-[#DCE3E0] text-xs">
+        {/* Compact Segmented Range Control */}
+        <div className="flex items-center space-x-0.5 bg-[#080A0A] rounded-lg p-0.5 border border-[#252C29] text-xs">
           {rangeButtons.map((btn) => {
             const isSelected = rangeFilter === btn.id;
             return (
               <button
                 key={btn.id}
                 onClick={() => setRangeFilter(btn.id)}
-                className={`relative px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                  isSelected ? 'text-[#18201F] font-semibold' : 'text-[#687370] hover:text-[#18201F]'
+                className={`relative px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors ${
+                  isSelected ? 'text-[#F1F4F1] font-semibold' : 'text-[#8B9691] hover:text-[#F1F4F1]'
                 }`}
               >
                 <span className="relative z-10">{btn.label}</span>
                 {isSelected && (
                   <motion.div
                     layoutId="activeRangePill"
-                    className="absolute inset-0 bg-white rounded-md shadow-terminal-sm border border-[#DCE3E0]/70"
+                    className="absolute inset-0 bg-[#151A18] rounded-md border border-[#252C29]"
                     transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                   />
                 )}
@@ -369,8 +367,8 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         </div>
       </div>
 
-      {/* Main ECharts Canvas Surface (Dominant 500px vertical space) */}
-      <div className="w-full h-[500px]">
+      {/* Main ECharts Surface */}
+      <div className="w-full flex-1 min-h-[360px]">
         <ReactECharts
           option={option}
           style={{ height: '100%', width: '100%' }}
@@ -380,25 +378,25 @@ export const ForecastHeroChart: React.FC<HeroChartProps> = ({ series, onSelectPe
         />
       </div>
 
-      {/* Minimal Bottom Legend (No Implementation Jargon) */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-[#687370] pt-3 border-t border-[#DCE3E0] mt-1 gap-2">
-        <div className="flex flex-wrap items-center gap-5">
+      {/* Bottom Chart Footer Legend */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-[#8B9691] pt-3 border-t border-[#252C29] mt-1 gap-2">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-1 rounded-xs bg-[#087F6A] inline-block" />
-            <span className="text-[#18201F] font-medium">Actual</span>
+            <span className="w-2.5 h-1 rounded-xs bg-[#35B89A] inline-block" />
+            <span className="text-[#F1F4F1] font-medium text-[11px]">Actual Outturn</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-0.5 border-t-2 border-dashed border-[#C96A3D] inline-block" />
-            <span className="text-[#18201F] font-medium">Day-Ahead Forecast</span>
+            <span className="w-2.5 h-0.5 border-t-2 border-dashed border-[#E58A5C] inline-block" />
+            <span className="text-[#F1F4F1] font-medium text-[11px]">Day-Ahead Forecast</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-1.5 rounded-xs bg-[#D5A83E]/25 border border-[#D5A83E] inline-block" />
-            <span>Uncertainty Corridor</span>
+            <span className="w-2.5 h-1.5 rounded-xs bg-[#D7B35A]/25 border border-[#D7B35A] inline-block" />
+            <span className="text-[11px]">Uncertainty Band</span>
           </div>
         </div>
 
-        <div className="text-[11px] text-[#8B9692]">
-          <span>{filteredData.length} Settlement Records · Click any point to open evolution</span>
+        <div className="text-[11px] font-mono text-[#5F6A65]">
+          <span>{filteredData.length} Settlement Records · Click point to inspect</span>
         </div>
       </div>
     </div>
